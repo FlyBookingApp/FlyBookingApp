@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">VeYu</string>
+    <string name="title_activity_splash_screen">splashScreen</string>
+    <string name="title_activity_splash_state">SplashState</string>
+    <string name="title_activity_login_screen">LoginScreen</string>
+    <string name="title_activity_register_screen">RegisterScreen</string>
+    <string name="title_activity_home_screen">HomeScreen</string>
+    <string name="title_activity_ticket_type_screen">TicketTypeScreen</string>
+    <string name="title_activity_flight_list_screen">FlightListScreen</string>
+</resources>

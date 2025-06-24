@@ -484,7 +484,7 @@ fun PaymentScreen(
 
                         Button(
                             onClick = {
-
+                                viewModel.onDelete(booking.bookingId)
                             },
                             modifier = Modifier
                                 .height(48.dp)

@@ -200,6 +200,17 @@ class DetailBookingViewModel @Inject constructor(
         }
     }
 
+    fun onDelete(bookingId: Long) {
+        viewModelScope.launch {
+            try {
+                val result = repositoryBooking.deleteBooking(bookingId)
+                Log.d("PaymentViewModel", "deleteBooking: ${result.toString()}")
+            } catch (e: Exception) {
+                Log.e("PaymentViewModel", "deleteBooking error: ${e.message}")
+            }
+        }
+    }
+
     suspend fun confirmBooking(bookingId: Long): Boolean {
         return try {
             val result = repositoryBooking.confirmBooking(bookingId)

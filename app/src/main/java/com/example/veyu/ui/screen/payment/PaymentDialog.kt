@@ -164,6 +164,7 @@ fun PaymentDialog(
                             .trim()
                             .toDouble()
                             viewModel.onConfirm(booking.bookingId, totalAmount)
+
                             isShowDetail(false)
                         },
                         modifier = Modifier

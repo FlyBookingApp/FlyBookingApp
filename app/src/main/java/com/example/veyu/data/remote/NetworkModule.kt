@@ -1,6 +1,7 @@
 package com.example.veyu.data.remote
 
 import android.content.Context
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import com.example.veyu.data.local.UserPreferences
 import com.example.veyu.data.remote.api.AirportApi
 import com.example.veyu.data.remote.api.AuthApi
@@ -30,6 +31,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
+            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -38,6 +40,7 @@ object NetworkModule {
     val authApi: AuthApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AuthApi::class.java)

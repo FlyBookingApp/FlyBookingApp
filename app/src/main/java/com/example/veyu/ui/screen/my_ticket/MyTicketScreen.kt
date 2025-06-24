@@ -153,7 +153,7 @@ fun MyTicketScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(filteredList) { booking ->
-                    ItemBooking(!isYesPay, booking.tripType, selectedDetail = { selectedDetail = it }, booking, uiFlights)
+                    ItemBooking(!isYesPay, booking.tripType, selectedDetail = { selectedDetail = it }, booking, uiFlights, viewModel)
                 }
             }
 
@@ -180,7 +180,8 @@ fun ItemBooking(
     isRoundTrip: Boolean = true,
     selectedDetail: (Long) -> Unit,
     booking: BookingNew,
-    flights: List<FlightData>
+    flights: List<FlightData>,
+    viewModel: MyTicketViewModel
 ) {
     Column (
         modifier = Modifier
@@ -239,6 +240,9 @@ fun ItemBooking(
                     .height(35.dp)
                     .padding(end = 8.dp)
                     .padding(bottom = 5.dp)
+                    .clickable {
+                        viewModel.onDelete(booking.bookingId)
+                    }
             )
         }
 

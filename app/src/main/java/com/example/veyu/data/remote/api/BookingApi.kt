@@ -4,6 +4,7 @@ import com.example.veyu.data.remote.model.Request.BookingRequest
 import com.example.veyu.data.remote.model.Response.BookingCreatedRp
 import com.example.veyu.data.remote.model.Response.BookingResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -28,4 +29,7 @@ interface BookingApi {
         @Path("bookingId") bookingId: String,
         @Query("status") status: String
     ): BookingResponse
+    
+    @DELETE("api/v1/bookings/{bookingId}")
+    suspend fun deleteBooking(@Path("bookingId") bookingId: Long): String
 }

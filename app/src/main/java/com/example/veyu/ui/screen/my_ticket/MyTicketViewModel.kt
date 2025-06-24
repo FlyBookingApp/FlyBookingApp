@@ -171,6 +171,20 @@ class MyTicketViewModel @Inject constructor(
         }
     }
 
+    fun onDelete(bookingId: Long) {
+        viewModelScope.launch {
+            try {
+                val result = repositoryBooking.deleteBooking(bookingId)
+                Log.d("PaymentViewModel", "deleteBooking: ${result}")
+
+                _bookingList.value = _bookingList.value.filter { it.bookingId != bookingId }
+
+            } catch (e: Exception) {
+                Log.e("PaymentViewModel", "deleteBooking error: ${e.message}")
+            }
+        }
+    }
+
     private fun formatPrice(price: Double?): String {
         // Nếu price null thì trả về "0đ"
         if (price == null) return "0đ"

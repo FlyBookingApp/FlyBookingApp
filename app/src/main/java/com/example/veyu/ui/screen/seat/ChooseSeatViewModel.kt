@@ -97,7 +97,7 @@ class ChooseSeatViewModel @Inject constructor(
                         )
                     }
 
-                _seatsEconomy = seatResponses
+                _seatsEconomy = sortedSeatResponses
                     .filter { it.seatType == "ECONOMY" }
                     .map { seat ->
                         Seat(
@@ -110,7 +110,7 @@ class ChooseSeatViewModel @Inject constructor(
                         )
                     }
 
-                _seatsPremiuEconomy = seatResponses
+                _seatsPremiuEconomy = sortedSeatResponses
                     .filter { it.seatType == "PREMIUM_ECONOMY" }
                     .map { seat ->
                         Seat(

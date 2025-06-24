@@ -50,4 +50,13 @@ class BookingRepository(private val api: BookingApi) {
             Result.failure(e)
         }
     }
+
+    suspend fun deleteBooking(bookingId: Long): Result<String> {
+        return try {
+            val result = api.deleteBooking(bookingId)
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

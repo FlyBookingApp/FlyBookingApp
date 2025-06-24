@@ -196,7 +196,7 @@ fun DatePickerSheet(
                         departureDate,
                         formatter
                     )
-                    if (!selectedDate.isBefore(departure)) {
+                    if (selectedDate.isAfter(departure)) {
                         onDateSelected(selectedDate.format(formatter))
                     } else {
                         errorMessage = "Vui lòng chọn ngày sau ngày đi (${departure.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))})"

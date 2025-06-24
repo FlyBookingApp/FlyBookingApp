@@ -25,34 +25,45 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.veyu.R
+import com.example.veyu.data.repository.AirportRepository
+import com.example.veyu.domain.model.FlightSearchRequest
 import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
 import com.example.veyu.ui.screen.login.ui.theme.white_form
 import com.example.veyu.ui.theme.LightGrayBg
+import java.text.SimpleDateFormat
+import java.util.Locale
 
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun WelcomePreview() {
-    TicketTypeScreen(
-        onNavigateToMain ={}
-    )
-}
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TicketTypeScreen(
-    viewModel: TicketTypeViewModel = viewModel(),
-    onNavigateToMain: () -> Unit,
+    onNavigateToMain: (FlightSearchRequest) -> Unit,
+    viewModel: TicketTypeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val showLocationPicker = remember { mutableStateOf(false) }
     val showPassengerPicker = remember { mutableStateOf(false) }
     LaunchedEffect(state.isFlightList) {
-        if (state.isFlightList) onNavigateToMain()
-        viewModel.isFlightList(false)
+        if (state.isFlightList) {
+            val indexDt = state.airportLocations.indexOf(state.selectedDeparture)
+            val indexDn = state.airportLocations.indexOf(state.selectedDestination)
+
+            val request = FlightSearchRequest(
+                isRoundTrip = state.isRoundTrip,
+                departureCode = state.airportLocationsId.getOrNull(indexDt).orEmpty(),
+                destinationCode = state.airportLocationsId.getOrNull(indexDn).orEmpty(),
+                departureDate = convertDateFormatLegacy(removeDayOfWeek(state.departureDate)),
+                returnDate = if (state.returnDate.isNotEmpty())
+                    convertDateFormatLegacy(removeDayOfWeek(state.returnDate)) else state.returnDate,
+                passengerInfo = state.passengerInfo
+            )
+
+            onNavigateToMain(request)
+            viewModel.isFlightList(false)
+        }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -246,7 +257,11 @@ fun TicketTypeScreen(
                                 title = "Ngày về",
                                 value = if (state.returnDate.isBlank()) "Chọn ngày" else state.returnDate,
                                 modifier = Modifier.weight(1f),
-                                onClick = { viewModel.showDatePicker(true) }
+                                onClick = {
+                                    if (state.departureDate.isNotBlank()) {
+                                        viewModel.showDatePicker(true)
+                                    }
+                                }
                             )
                         }
                     }
@@ -411,6 +426,17 @@ fun TicketTypeScreen(
         }
 
     }
+}
+
+fun removeDayOfWeek(dateString: String): String {
+    return dateString.substringAfter(", ").trim()
+}
+
+fun convertDateFormatLegacy(input: String): String {
+    val inputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val date = inputFormat.parse(input)
+    return outputFormat.format(date!!)
 }
 
 @Composable

@@ -42,6 +42,8 @@ fun PassengerPickerSheet(
     var children by remember { mutableStateOf(passengerInfo.children) }
     var infants by remember { mutableStateOf(passengerInfo.infants) }
 
+    val totalPassengers = adults + children + infants
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -63,19 +65,34 @@ fun PassengerPickerSheet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        PassengerRow("Người lớn", "Từ đủ 12 tuổi", adults,
+        PassengerRow(
+            label = "Người lớn",
+            description = "Từ đủ 12 tuổi",
+            count = adults,
             onDecrement = { if (adults > 1) adults-- },
-            onIncrement = { adults++ }
+            onIncrement = {
+                if (totalPassengers < 9) adults++
+            }
         )
 
-        PassengerRow("Trẻ em", "2 đến dưới 12 tuổi", children,
+        PassengerRow(
+            label = "Trẻ em",
+            description = "2 đến dưới 12 tuổi",
+            count = children,
             onDecrement = { if (children > 0) children-- },
-            onIncrement = { children++ }
+            onIncrement = {
+                if (totalPassengers < 9) children++
+            }
         )
 
-        PassengerRow("Em bé", "Dưới 2 tuổi", infants,
+        PassengerRow(
+            label = "Em bé",
+            description = "Dưới 2 tuổi",
+            count = infants,
             onDecrement = { if (infants > 0) infants-- },
-            onIncrement = { infants++ }
+            onIncrement = {
+                if (totalPassengers < 9 && infants < adults) infants++
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

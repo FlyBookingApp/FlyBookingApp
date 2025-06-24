@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,24 +23,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.veyu.R
+import com.example.veyu.data.local.UserPreferences
 import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
 import com.example.veyu.ui.screen.login.ui.theme.white_form
 
-@Preview(showBackground = true)
 @Composable
 fun WelcomePreview() {
     LoginScreen(
-        viewModel = viewModel(),
         onNavigateToMain = {},
         onNavigateToRegister = {}
     )
 }
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = viewModel(),
     onNavigateToMain: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
+    val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
+
+    val viewModel: LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(userPreferences)
+    )
+
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(state.isLoggedIn) {

@@ -16,5 +16,20 @@ class HomeViewModel : ViewModel() {
     fun resetTicketTypeFlag() {
         _uiState.update { it.copy(isTicketTypeSelected = false) }
     }
-
+    fun onAccountClick(){
+        _uiState.value = _uiState.value.copy(
+            isAccessSelsected = true
+        )
+    }
+    fun resetAccountFlag() {
+        _uiState.update { it.copy(isAccessSelsected = false) }
+    }
+    fun onMyTicketClick(){
+        _uiState.value = _uiState.value.copy(
+            isMyTicketSelected = true
+        )
+    }
+    fun resetMyTicketFlag() {
+        _uiState.update { it.copy(isMyTicketSelected = false) }
+    }
 }

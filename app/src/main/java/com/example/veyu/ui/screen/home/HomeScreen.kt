@@ -29,18 +29,11 @@ import com.example.veyu.R
 import com.example.veyu.ui.screen.login.ui.theme.white_form
 import com.example.veyu.ui.screen.home.ui.theme.LightGracho
 
-
-@Preview(showBackground = true)
-@Composable
-fun WelcomePreview() {
-    HomeScreen(
-        viewModel = viewModel(),
-        onNavigateToTicketType = {}
-    )
-}
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = viewModel(),
-               onNavigateToTicketType: () -> Unit) {
+               onNavigateToTicketType: () -> Unit,
+               onNavigateToAccount: () -> Unit,
+               onNavigateToMyTicket: () -> Unit) {
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(state.isTicketTypeSelected)  {
@@ -49,6 +42,21 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel(),
             viewModel.resetTicketTypeFlag()
         }
     }
+    LaunchedEffect(state.isAccessSelsected)  {
+
+        if(state.isAccessSelsected != false) {
+            onNavigateToAccount()
+            viewModel.resetAccountFlag()
+        }
+    }
+
+    LaunchedEffect(state.isMyTicketSelected) {
+        if (state.isMyTicketSelected != false) {
+            onNavigateToMyTicket()
+            viewModel.resetMyTicketFlag()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.background),
@@ -100,13 +108,13 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel(),
                             icon = R.drawable.ic_ticket,
                             label = "Vé của tôi",
                             overlayIcon = R.drawable.ic_people_small,
-                            onClick = { viewModel.onTicketTypeClick() }
+                            onClick = { viewModel.onMyTicketClick() }
                         )
                         HomeMenuItem(
                             icon = R.drawable.ic_people_nbg,
                             label = "Tài khoản",
                             iconSize = 35.dp,
-                            onClick = { viewModel.onTicketTypeClick() }
+                            onClick = { viewModel.onAccountClick() }
                         )
                     }
                 }

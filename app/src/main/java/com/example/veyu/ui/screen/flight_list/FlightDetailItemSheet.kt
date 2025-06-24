@@ -1,6 +1,7 @@
 package com.example.veyu.ui.screen.flight_list
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -24,12 +26,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.veyu.R
 import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
 import com.example.veyu.ui.theme.LightGrayBg
@@ -38,7 +45,7 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FlightDetailDialog(flight: FlightInfo, onDismiss: () -> Unit, navController: NavController) {
+fun FlightDetailDialog(viewModel: FlightListViewModel,flight: FlightInfo, onDismiss: () -> Unit, navController: NavController) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
@@ -53,41 +60,62 @@ fun FlightDetailDialog(flight: FlightInfo, onDismiss: () -> Unit, navController:
     } catch (e: Exception) {
         "--:--"
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {}
             .background(Color.Black.copy(alpha = 0.4f)),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFA5D9E8))
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 20.dp,
+                        topEnd = 20.dp,
+                        bottomStart = 0.dp,
+                        bottomEnd = 0.dp
+                    )
+                )
+                .background(Color.White)
         ) {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Chi tiết vé", style = MaterialTheme.typography.titleMedium)
+                Text("Chi tiết chuyến bay", style = MaterialTheme.typography.titleMedium)
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .size(30.dp)
+                        .size(20.dp)
                         .clickable { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("X")
+                    Text("✕")
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("${flight.departAirport} - ${flight.arriveAirport}")
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color(0xFFA5D9E8))
+                    .padding(vertical = 25.dp)
                     .padding(horizontal = 25.dp)
+            ) {
+                Text(
+                    text = "${flight.departAirportName} - ${flight.arriveAirportName}",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(vertical = 10.dp)
                     .border(width = 1.dp, color = Color.Black)
                     .background(Color.White)
@@ -98,30 +126,27 @@ fun FlightDetailDialog(flight: FlightInfo, onDismiss: () -> Unit, navController:
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically // căn giữa hình & chữ theo chiều dọc
                 ) {
-                    if(flight.airline=="VietJet Air") {
-                        Image(
-                            painter = painterResource(id = R.drawable.vietjetair),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .width(50.dp)
-                                .height(30.dp)
-                                .padding(end = 8.dp)
-                        )
-                    }
-                    else{
-                        Image(
-                            painter = painterResource(id = R.drawable.vietnamairline),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .width(50.dp)
-                                .height(30.dp)
-                                .padding(end = 8.dp)
-                        )
-                    }
-                    Text(
-                        text = "${flight.airline} • ${flight.code}",
-                        style = MaterialTheme.typography.bodySmall
+                    Image(
+                        painter = painterResource(id = flight.partLogo),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(40.dp)
+                            .padding(end = 8.dp)
                     )
+                    Column {
+                        Text(
+                            text = "${flight.airline}",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "${flight.code}",
+                            color = Color(0xFF2B1CCC),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
                 DashedDivider(color = Color.Black, thickness = 1f)
                 Row(modifier = Modifier
@@ -146,7 +171,12 @@ fun FlightDetailDialog(flight: FlightInfo, onDismiss: () -> Unit, navController:
                     horizontalArrangement = Arrangement.SpaceBetween
                 ){
                     Text("$depart", style = MaterialTheme.typography.bodyLarge)
-                    Text("————>", style = MaterialTheme.typography.bodyLarge)
+                    Image(
+                        painter = painterResource(id = R.drawable.point),
+                        contentDescription = null,
+                        Modifier.width(100.dp)
+                    )
+                    //Text("————>", style = MaterialTheme.typography.bodyLarge)
                     Text("$arrive", style = MaterialTheme.typography.bodyLarge)
                 }
                 Row(modifier = Modifier
@@ -157,6 +187,7 @@ fun FlightDetailDialog(flight: FlightInfo, onDismiss: () -> Unit, navController:
                 ){
                     Text("${flight.type} ", style = MaterialTheme.typography.bodySmall)
                 }
+            }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -236,7 +267,14 @@ fun FlightDetailDialog(flight: FlightInfo, onDismiss: () -> Unit, navController:
                 )
 
                 Button(
-                    onClick = { navController.navigate("passengerInfor")},
+                    onClick = {
+                        if (viewModel.onClinkYes(flight.id)) {
+                            Log.d ("FlightListViewModel", "onClinkYes: {${viewModel.onClinkYes(flight.id)}")
+                            onDismiss()
+                        } else {
+                            onDismiss()
+                            viewModel.setIsDeparture(false)
+                        }},
                     colors = ButtonDefaults.buttonColors(
                         containerColor = button_color_blue,
                         contentColor = Color.White

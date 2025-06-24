@@ -1,18 +1,32 @@
 package com.example.veyu.ui.screen.ticket_type
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.veyu.data.remote.model.Response.AirportResponse
+import com.example.veyu.data.repository.AirportRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TicketTypeViewModel : ViewModel() {
+@HiltViewModel
+class TicketTypeViewModel @Inject constructor(
+    private val repository: AirportRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(TicketTypeState())
     val uiState: StateFlow<TicketTypeState> = _uiState
+
+    private val _airports = MutableStateFlow<List<AirportResponse>>(emptyList())
+    val airports: StateFlow<List<AirportResponse>> = _airports
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     init {
-        loadAirportLocations()
-        loadAirportLocationId()
+        loadAirports()
     }
 
     fun onToggleTripType(isRoundTrip: Boolean) {
@@ -45,14 +59,15 @@ class TicketTypeViewModel : ViewModel() {
     }
     fun loadAirportLocations() {
         viewModelScope.launch {
-            val listFromDb = listOf("Hà Nội", "Đà Nẵng", "TP.HCM", "Huế", "Nha Trang", "Buôn Mê Thuộc", "Cần Thơ", "Phú Quốc", "Vũng Tàu", "Cà Mau")
-            _uiState.update { it.copy(airportLocations = listFromDb) }
+            val cityList = _airports.value.mapNotNull { it.city }
+            android.util.Log.d("TicketTypeViewModel", "Số lượng cityList: ${cityList.size}")
+            _uiState.update { it.copy(airportLocations = cityList) }
         }
     }
     fun loadAirportLocationId(){
         viewModelScope.launch {
-            val listFromDb = listOf("HAN", "DN", "SGN", "HUI", "CXR", "BMT", "CTH", "PQC", "VTS", "CAH")
-            _uiState.update { it.copy(airportLocationsId = listFromDb) }
+            val iataList = _airports.value.mapNotNull { it.iataCode }
+            _uiState.update { it.copy(airportLocationsId = iataList) }
         }
     }
 
@@ -61,5 +76,19 @@ class TicketTypeViewModel : ViewModel() {
     }
     fun setPassengerInfo(passengerInfo: PassengerInfo) {
         _uiState.value = _uiState.value.copy(passengerInfo = passengerInfo)
+    }
+
+    fun loadAirports() {
+        viewModelScope.launch {
+            repository.fetchAirports()
+                .onSuccess { _airports.value = it
+                    android.util.Log.d("TicketTypeViewModel", "Số lượng sân bay: ${it.size}")
+                    loadAirportLocations()
+                    loadAirportLocationId()
+                }
+                .onFailure { _error.value = it.message
+                    android.util.Log.e("TicketTypeViewModel", "Lỗi gọi API sân bay: ${it.message}")
+                }
+        }
     }
 }

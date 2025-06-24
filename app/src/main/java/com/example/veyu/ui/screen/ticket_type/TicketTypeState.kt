@@ -29,3 +29,13 @@ data class PassengerInfo(
     val children: Int = 0,   // từ 2 đến dưới 12 tuổi
     val infants: Int = 0     // dưới 2 tuổi
 )
+
+fun PassengerInfo.toReadableString(): String {
+    val parts = mutableListOf<String>()
+
+    if (adults > 0) parts.add("Người lớn: $adults")
+    if (children > 0) parts.add("Trẻ em: $children")
+    if (infants > 0) parts.add("Em bé: $infants")
+
+    return parts.joinToString(", ")
+}

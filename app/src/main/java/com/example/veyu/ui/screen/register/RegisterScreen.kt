@@ -27,16 +27,6 @@ import com.example.veyu.R
 import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
 import com.example.veyu.ui.screen.login.ui.theme.white_form
 
-@Preview(showBackground = true)
-@Composable
-fun WelcomePreview() {
-    RegisterScreen(
-        viewModel = RegisterViewModel(),
-        onNavigateToLogin = {},
-        onNavigateToMain = {}
-    )
-}
-
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = viewModel(),
@@ -96,15 +86,6 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     RegisterTextField(
-                        label = "Tên người dùng",
-                        value = state.fullName,
-                        onValueChange = viewModel::onFullNameChange,
-                        leadingIcon = R.drawable.ic_people,
-                        iconSize = 30.dp,
-                        hint = "Nhập tên người dùng"
-                    )
-
-                    RegisterTextField(
                         label = "Email",
                         value = state.email,
                         onValueChange = viewModel::onEmailChange,
@@ -120,6 +101,16 @@ fun RegisterScreen(
                         leadingIcon = R.drawable.ic_password,
                         iconSize = 20.dp,
                         hint = "Nhập mật khẩu",
+                        isPassword = true
+                    )
+
+                    RegisterTextField(
+                        label = "Xác nhận mật khẩu",
+                        value = state.confirmPassword,
+                        onValueChange = viewModel::onConfirmPasswordChange,
+                        leadingIcon = R.drawable.ic_password,
+                        iconSize = 20.dp,
+                        hint = "Xác nhận mật khẩu",
                         isPassword = true
                     )
 
@@ -148,13 +139,23 @@ fun RegisterScreen(
                         Text("Đăng ký", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = if (state.errorMessage.isNotEmpty()) state.errorMessage else " ", // Giữ chiều cao
-                        color = if (state.errorMessage.isNotEmpty()) Color.Red else Color.Transparent,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        fontSize = 14.sp
-                    )
+                    if (state.errorMessage.isNotEmpty()) {
+                        val isSuccess = state.errorMessage.contains("thành công", ignoreCase = true)
+                        val messageColor = if (isSuccess) Color(0xFF2E7D32) else Color.Red
+
+                        Text(
+                            text = state.errorMessage,
+                            color = messageColor,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.height(20.dp))// Giữ chỗ khi chưa có message
+                    }
 
 
 

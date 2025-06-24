@@ -2,12 +2,12 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="VeYu.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-01T09:23:06.869699800Z">
+        <DropdownSelection timestamp="2025-06-15T05:44:29.840836300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=e799500cb7ce" />
+              <DeviceId pluginId="Default" identifier="serial=emulator-5554;connection=951ba36f" />
             </handle>
           </Target>
         </DropdownSelection>

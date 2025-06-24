@@ -14,22 +14,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 
-@Preview(showBackground = true)
-@Composable
-fun WelcomePreview() {
-    SplashScreen(onNavigateNext = {})
-}
-
 @Composable
 fun SplashScreen(
-    viewModel: SplashViewModel = viewModel(),
-    onNavigateNext: () -> Unit
+    viewModel: SplashViewModel,
+    onNavigateNext: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(state.isLoading) {
         if (!state.isLoading) {
-            onNavigateNext()
+            if (state.isLoggedIn) {
+                onNavigateNext()       // → home
+            } else {
+                onNavigateToLogin()   // → login
+            }
         }
     }
 

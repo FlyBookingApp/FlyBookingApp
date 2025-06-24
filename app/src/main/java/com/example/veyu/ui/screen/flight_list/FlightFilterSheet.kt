@@ -9,7 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -68,129 +72,204 @@ fun filterFlights(flights: List<FlightInfo>, filter: FlightFilter): List<FlightI
 
 @Composable
 fun FilterSheet(
+    initialFilter: FlightFilter,
     onApplyFilter: (FlightFilter) -> Unit,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit
 ) {
-    var stops by remember { mutableStateOf(mutableSetOf<String>()) }
+    var stops by remember { mutableStateOf(initialFilter.stops.toMutableSet()) }
     val allStops = listOf("Bay thẳng", "1 điểm dừng")
 
     val timeSlots = TimeSlot.values().map { it.label }
-    var departTimeSlots by remember { mutableStateOf(mutableSetOf<String>()) }
-    var arriveTimeSlots by remember { mutableStateOf(mutableSetOf<String>()) }
+    var departTimeSlots by remember { mutableStateOf(initialFilter.departTimeSlots.map { it.label }.toMutableSet()) }
+    var arriveTimeSlots by remember { mutableStateOf(initialFilter.arriveTimeSlots.map { it.label }.toMutableSet()) }
 
     val airlines = listOf("VietJet Air", "Pacific Airlines", "Vietnam Airlines", "Bamboo Airways")
-    var selectedAirlines by remember { mutableStateOf(mutableSetOf<String>()) }
+    var selectedAirlines by remember { mutableStateOf(initialFilter.airlines.toMutableSet()) }
 
-    var priceRange by remember { mutableStateOf(800_000f..15_000_000f) }
+    var priceRange by remember { mutableStateOf(initialFilter.minPrice.toFloat()..initialFilter.maxPrice.toFloat()) }
 
     fun formatCurrency(value: Float): String {
         val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
         return formatter.format(value.toInt()) + " đ"
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color.LightGray, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .padding(16.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {}
+            .background(Color.Black.copy(alpha = 0.4f)),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Text("Bộ lọc", style = MaterialTheme.typography.titleMedium, color = Color.Black)
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text("Khoảng giá (VND)", style = MaterialTheme.typography.titleSmall, color = Color.Black)
-
-        RangeSlider(
-            value = priceRange,
-            onValueChange = { priceRange = it },
-            valueRange = 0f..20_000_000f,
-            steps = 100,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            colors = SliderDefaults.colors(
-                thumbColor = Color.White,
-                activeTrackColor = Color(0xFF1E88E5),
-                inactiveTrackColor = Color(0xFFE0E0E0),
-                activeTickColor = Color.Transparent,
-                inactiveTickColor = Color.Transparent
-            )
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .padding(16.dp)
         ) {
-            Text("Tối thiểu: ${formatCurrency(priceRange.start)}", color = Color.DarkGray)
-            Text("Tối đa: ${formatCurrency(priceRange.endInclusive)}", color = Color.DarkGray)
-        }
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Spacer(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("Số điểm dừng", color = Color.Black)
-        Row {
-            allStops.forEach { stop ->
-                FilterChip(
-                    label = stop,
-                    selected = stops.contains(stop),
-                    onClick = {
-                        stops = stops.toMutableSet().apply {
-                            if (contains(stop)) remove(stop) else add(stop)
+                Text(
+                    modifier = Modifier
+                        .padding(start = 5.dp)
+                        .weight(3f),
+                    text = "Bộ lọc",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    modifier = Modifier
+                        .padding(start = 5.dp)
+                        .clickable {
+                            onDismiss()
                         }
-                    }
+                        .weight(1f),
+                    text = "✕",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.End
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("Giờ cất cánh", color = Color.Black)
-        Row {
-            timeSlots.forEach { slot ->
-                TimeFilterChip(slot, departTimeSlots) { departTimeSlots = it.toMutableSet() }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("Khoảng giá (VND)", style = MaterialTheme.typography.titleSmall, color = Color.Black)
+
+            RangeSlider(
+                value = priceRange,
+                onValueChange = { priceRange = it },
+                valueRange = 0f..20_000_000f,
+                steps = 100,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.White,
+                    activeTrackColor = Color(0xFF1E88E5),
+                    inactiveTrackColor = Color(0xFFE0E0E0),
+                    activeTickColor = Color.Transparent,
+                    inactiveTickColor = Color.Transparent
+                )
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Tối thiểu: ${formatCurrency(priceRange.start)}", color = Color.DarkGray)
+                Text("Tối đa: ${formatCurrency(priceRange.endInclusive)}", color = Color.DarkGray)
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Giờ hạ cánh", color = Color.Black)
-        Row {
-            timeSlots.forEach { slot ->
-                TimeFilterChip(slot, arriveTimeSlots) { arriveTimeSlots = it.toMutableSet() }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Hãng hàng không", color = Color.Black)
-        Column {
-            airlines.forEach { airline ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = selectedAirlines.contains(airline),
-                        onCheckedChange = {
-                            selectedAirlines = selectedAirlines.toMutableSet().apply {
-                                if (it) add(airline) else remove(airline)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Số điểm dừng", color = Color.Black)
+            Row {
+                allStops.forEach { stop ->
+                    FilterChip(
+                        label = stop,
+                        selected = stops.contains(stop),
+                        onClick = {
+                            stops = stops.toMutableSet().apply {
+                                if (contains(stop)) remove(stop) else add(stop)
                             }
-                        },
-                        colors = CheckboxDefaults.colors(uncheckedColor = Color.Black)
+                        }
                     )
-                    Text(airline)
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = onDismiss) { Text("Hủy") }
-            Button(onClick = {
-                val filter = FlightFilter(
-                    minPrice = priceRange.start.toInt(),
-                    maxPrice = priceRange.endInclusive.toInt(),
-                    stops = stops.toSet(),
-                    departTimeSlots = departTimeSlots.mapNotNull { TimeSlot.fromLabel(it) }.toSet(),
-                    arriveTimeSlots = arriveTimeSlots.mapNotNull { TimeSlot.fromLabel(it) }.toSet(),
-                    airlines = selectedAirlines.toSet()
-                )
-                onApplyFilter(filter)
-            }) {
-                Text("Áp dụng")
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Giờ cất cánh", color = Color.Black)
+            Row {
+                timeSlots.forEach { slot ->
+                    TimeFilterChip(slot, departTimeSlots) { departTimeSlots = it.toMutableSet() }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Giờ hạ cánh", color = Color.Black)
+            Row {
+                timeSlots.forEach { slot ->
+                    TimeFilterChip(slot, arriveTimeSlots) { arriveTimeSlots = it.toMutableSet() }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Hãng hàng không", color = Color.Black)
+            Column {
+                airlines.forEach { airline ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = selectedAirlines.contains(airline),
+                            onCheckedChange = {
+                                selectedAirlines = selectedAirlines.toMutableSet().apply {
+                                    if (it) add(airline) else remove(airline)
+                                }
+                            },
+                            colors = CheckboxDefaults.colors(uncheckedColor = Color.Black)
+                        )
+                        Text(airline)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {
+                        val filter = FlightFilter(
+                            minPrice = priceRange.start.toInt(),
+                            maxPrice = priceRange.endInclusive.toInt(),
+                            stops = stops.toSet(),
+                            departTimeSlots = departTimeSlots.mapNotNull { TimeSlot.fromLabel(it) }.toSet(),
+                            arriveTimeSlots = arriveTimeSlots.mapNotNull { TimeSlot.fromLabel(it) }.toSet(),
+                            airlines = selectedAirlines.toSet()
+                        )
+                        onApplyFilter(filter)
+                    },
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .height(48.dp)
+                        .weight(2f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF63C0FF),
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(text = "Áp dụng", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Button(
+                    onClick = {
+                        val filter = FlightFilter(
+                            minPrice = 0,
+                            maxPrice = 20_000_000,
+                            stops = emptySet(),
+                            departTimeSlots = emptySet(),
+                            arriveTimeSlots = emptySet(),
+                            airlines = emptySet()
+                        )
+                        onApplyFilter(filter)
+                    },
+                    modifier = Modifier
+                        .height(48.dp)
+                        .weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF0004),
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text(text = "Đặt lại", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
             }
         }
     }

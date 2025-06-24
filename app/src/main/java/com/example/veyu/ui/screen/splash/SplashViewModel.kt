@@ -1,25 +1,36 @@
 package com.example.veyu.ui.screen.splash
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.example.veyu.data.local.UserPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class SplashViewModel : ViewModel() {
+class SplashViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(SplashState())
     val uiState: StateFlow<SplashState> = _uiState
 
+    private val userPreferences = UserPreferences(application)
+
     init {
-        simulateLoading()
+        checkLoginStatus()
     }
 
-    private fun simulateLoading() {
+    private fun checkLoginStatus() {
         viewModelScope.launch {
-            delay(2000) // Splash delay 2 giây
-            _uiState.value = _uiState.value.copy(isLoading = false)
+            // Optional delay splash 2s
+            kotlinx.coroutines.delay(2000)
+
+            val token = userPreferences.token.first()
+            val isLoggedIn = !token.isNullOrEmpty()
+            _uiState.value = SplashState(
+                isLoading = false,
+                isLoggedIn = isLoggedIn
+            )
         }
     }
 }

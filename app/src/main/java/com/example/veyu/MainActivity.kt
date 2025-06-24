@@ -8,7 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import com.example.veyu.ui.theme.VeYuTheme
 import com.example.veyu.ui.screen.navigation.AppNavigation
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {

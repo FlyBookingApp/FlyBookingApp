@@ -217,7 +217,19 @@ fun ItemBooking(
             if (booking.flightIds != null && flights != null) {
                 var flight = flights.firstOrNull{it.id == booking.flightIds[0]}
                 var filghtRound = flights.firstOrNull{it.id == booking.flightIds[1]}
+
                 if (flight != null && filghtRound != null) {
+
+                    var flightTemp: FlightData
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    val date1 = LocalDateTime.parse(flight.departTime, formatter)
+                    val date2 = LocalDateTime.parse(filghtRound.departTime, formatter)
+                    if (date1.isAfter(date2)) {
+                        flightTemp = flight
+                        flight = filghtRound
+                        filghtRound = flightTemp
+                    }
+
                     FlightItem(flight = flight, isReturnTrip = false)
                     FlightItem(flight = filghtRound, isReturnTrip = true)
                 }

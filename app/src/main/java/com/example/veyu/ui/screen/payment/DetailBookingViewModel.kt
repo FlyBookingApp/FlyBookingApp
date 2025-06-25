@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -54,12 +56,6 @@ class DetailBookingViewModel @Inject constructor(
     private val _seats = MutableStateFlow<List<Seat>>(emptyList())
     val seats: StateFlow<List<Seat>> = _seats
 
-    private val _departureTicket = MutableStateFlow<List<Seat>>(emptyList())
-    val departureTicket: StateFlow<List<Seat>> = _departureTicket
-
-    private val _returnTickets = MutableStateFlow<List<Seat>>(emptyList())
-    val returnTickets: StateFlow<List<Seat>> = _returnTickets
-
     private val _isError = MutableStateFlow(false)
     val isError: StateFlow<Boolean> = _isError
 
@@ -78,8 +74,6 @@ class DetailBookingViewModel @Inject constructor(
         _uiFlights.value = emptyList()
         _uiPassenger.value = emptyList()
         _booking.value = BookingNew()
-        _departureTicket.value = emptyList()
-        _returnTickets.value = emptyList()
         _isError.value = false
         isRoundTrip = false
         userId = null
@@ -135,6 +129,19 @@ class DetailBookingViewModel @Inject constructor(
                 }
 
                 Log.d("PaymentViewModel", "_uiFlights: ${_uiFlights.value.toString()}")
+                if (_uiFlights.value.isNotEmpty()) {
+                    if(_uiFlights.value.size > 1) {
+                        var flightTemp: FlightData
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                        val date1 = LocalDateTime.parse(_uiFlights.value[1].departTime, formatter)
+                        val date2 = LocalDateTime.parse(_uiFlights.value[2].departTime, formatter)
+                        if (date1.isAfter(date2)) {
+                            val updatedList = listOf(_uiFlights.value[1], _uiFlights.value[0])
+                            // Cập nhật lại state bằng updatedList
+                            _uiFlights.value = updatedList
+                        }
+                    }
+                }
 
             } catch (e: Exception) {
                 Log.e("PaymentViewModel", "init error: ${e.message}")

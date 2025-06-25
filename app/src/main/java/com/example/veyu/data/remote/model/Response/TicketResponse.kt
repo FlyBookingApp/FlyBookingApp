@@ -8,7 +8,7 @@ data class TicketResponse(
     val passengerId: Long,
     val seatFlightId: Long,
     val status: String,
-    val price: String,
+    val price: Double,
     val issueDate: String,
     val cancelDate: String?,
     val barcode: String?,

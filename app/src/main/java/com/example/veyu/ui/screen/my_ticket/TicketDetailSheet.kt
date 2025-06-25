@@ -1,5 +1,6 @@
 package com.example.veyu.ui.screen.my_ticket
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.collectAsState
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,16 +45,47 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.veyu.R
+import com.example.veyu.ui.screen.login.LoginScreen
+import com.example.veyu.ui.screen.passenger_infor.FlightData
+import com.example.veyu.ui.screen.payment.Ticket
+import com.example.veyu.ui.screen.payment.TicketViewModel
+import com.example.veyu.ui.screen.seat.BookingNew
+import com.example.veyu.ui.screen.seat.Seat
 
 
 @Composable
 fun SeatDetailDialog(
     tripType: Boolean,
     isShowDetail: (Boolean) -> Unit,
-    isTicket: (Boolean) -> Unit
+    isTicket: (Boolean) -> Unit,
+    booking: BookingNew,
+    uiFlights: List<FlightData>,
+    seats: List<Seat>,
+    viewModel: TicketViewModel = hiltViewModel()
 ) {
-    var isFist by remember { mutableStateOf(true) }
+    var isFirst by remember { mutableStateOf(true) }
+    var isInitFirst by remember { mutableStateOf(true) }
+
+    var flightNo by remember {mutableStateOf("")}
+
+    val departureTickets by viewModel.departureTickets.collectAsState()
+    val returnTickets by viewModel.returnTickets.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (isInitFirst) {
+            viewModel.init(booking.bookingId)
+            Log.d("DetailBookingSheet", "Init called")
+            isInitFirst = false
+        }
+    }
+
+    Log.d("DetailBookingSheet", "departureTickets: ${departureTickets.toString()}")
+    Log.d("DetailBookingSheet", "returnTickets: ${returnTickets.toString()}")
+    Log.d("DetailBookingSheet", "uiFlights: ${uiFlights.toString()}")
+    Log.d("DetailBookingSheet", "seats: ${seats.toString()}")
+    Log.d("DetailBookingSheet", "booking: ${booking.toString()}")
 
     Box(
         modifier = Modifier
@@ -79,23 +113,6 @@ fun SeatDetailDialog(
                     .padding(10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (!(isShowDetail == null)) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .size(20.dp)
-                            .clickable {
-                                isShowDetail(true)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
-
                 Text("Chi tiết booking", style = MaterialTheme.typography.titleMedium)
                 Box(
                     modifier = Modifier
@@ -120,12 +137,19 @@ fun SeatDetailDialog(
                 ,
                 verticalArrangement = Arrangement.Center
             ) {
-                if (!tripType) {
-                    //FlightItem()
+                val flightNoTemp: String?
+
+                if (isFirst) {
+                    FlightItem(flight = uiFlights.first(), isReturnTrip = false)
+                    flightNoTemp = uiFlights.first().code
                 } else {
-                    //FlightItem()
+                    FlightItem(flight = uiFlights[1], isReturnTrip = true)
+                    flightNoTemp = uiFlights[1].code
                 }
 
+                if (flightNoTemp != null) {
+                    flightNo = flightNoTemp
+                }
             }
 
             Column(
@@ -141,7 +165,7 @@ fun SeatDetailDialog(
                 )
 
                 Text(
-                    text = " Mã chuyến bay: VJ12435\n Số lượng hành khách: 3 người",
+                    text = " Mã chuyến bay: ${flightNo}\n Số lượng hành khách: ${booking.passengerCountInt}",
                     fontSize = 13.sp,
                     color = Color(0xA6000000)
                 )
@@ -167,33 +191,24 @@ fun SeatDetailDialog(
                         .border(1.5.dp, Color.Black, RoundedCornerShape(15.dp))
 
                 ){
-                    item {
-                        TicketItem()
-                    }
-
-                    item {
-                        TicketItem()
-                    }
-
-                    item {
-                        TicketItem()
-                    }
-
-                    item {
-                        TicketItem()
-                    }
-
-                    item {
-                        TicketItem()
-                    }
-                    item {
-                        TicketItem()
-                    }
-                    item {
-                        TicketItem()
-                    }
-                    item {
-                        TicketItem()
+                    if (isFirst) {
+                        items(departureTickets.size) { index ->
+                            Log.d("TicketViewModel", "departureTickets: ${departureTickets.toString()}")
+                            Log.d("TicketViewModel", "seats: ${seats.toString()}")
+                            val seat = seats.find { it.seatId == departureTickets[index].seatFlightId }
+                            if (seat != null) {
+                                TicketItem(departureTickets[index], seat)
+                            }
+                        }
+                    } else {
+                        items(returnTickets.size) { index ->
+                            Log.d("TicketViewModel", "returnTickets: ${returnTickets.toString()}")
+                            Log.d("TicketViewModel", "seats: ${seats.toString()}")
+                            val seat = seats.find { it.seatId == returnTickets[index].seatFlightId }
+                            if (seat != null) {
+                                TicketItem(returnTickets[index], seat)
+                            }
+                        }
                     }
                 }
             }
@@ -208,9 +223,9 @@ fun SeatDetailDialog(
                     Spacer(modifier = Modifier.height(48.dp))
                 } else {
                     Row(Modifier.fillMaxWidth()) {
-                        OtherTicketButton(true, isFist = { isFist = it}, !tripType)
+                        OtherTicketButton(isFirst, isFist = { isFirst = it}, !tripType)
                         Spacer(modifier = Modifier.weight(1f))
-                        OtherTicketButton(false, isFist = { isFist = it}, tripType)
+                        OtherTicketButton(!isFirst, isFist = { isFirst = it}, tripType)
                     }
                 }
             }
@@ -218,8 +233,19 @@ fun SeatDetailDialog(
     }
 }
 
+//seats.find { it.seatId == ticket.seatFlightId }
 @Composable
-fun TicketItem() {
+fun TicketItem(
+    ticket: Ticket,
+    seat: Seat
+) {
+    var ticketClass: String = when(ticket.ticketClass) {
+        "BUSINESS" -> "Hạng Thương gia"
+        "ECONOMY" -> "Hạng Phổ thông"
+        "PREMIUM_ECONOMY" -> "Hạng Phổ thông đặc biệt"
+        else -> "Hạng Thương gia"
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -229,36 +255,34 @@ fun TicketItem() {
             Column(modifier = Modifier.weight(1f)) {
                 Row (modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text ="Số ghế: 1A",
+                        text ="Số ghế: ${seat.seatNumber}",
                         fontSize = 12.sp
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
 
                     Text(
-                        text ="Hạng ghế: Thương gia",
+                        text ="Hạng ghế: $ticketClass",
                         fontSize = 12.sp
                     )
                 }
 
                 Text(
-                    text ="Giá tiền: 1.200.000d",
+                    text ="Giá tiền: ${ticket.price}",
                     fontSize = 12.sp
                 )
 
-                Row (modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text ="Mã đặt vé: EP310450",
-                        fontSize = 12.sp
-                    )
+                Text(
+                    text ="Mã đặt vé: ${ticket.ticketNumber}",
+                    fontSize = 12.sp
+                )
 
-                    Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-                    Text(
-                        text ="Ngày đặt: 20/10/2023",
-                        fontSize = 12.sp
-                    )
-                }
+                Text(
+                    text ="Ngày đặt: ${ticket.createdAt}",
+                    fontSize = 12.sp
+                )
             }
         }
 
@@ -288,7 +312,7 @@ fun OtherTicketButton(
             )
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
-            .clickable { isFist(isRoundTrip) }
+            .clickable { isFist(!isRoundTrip) }
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Row(
@@ -315,3 +339,4 @@ fun OtherTicketButton(
         }
     }
 }
+

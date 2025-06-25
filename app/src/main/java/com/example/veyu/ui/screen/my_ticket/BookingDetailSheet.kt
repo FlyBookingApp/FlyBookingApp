@@ -83,6 +83,7 @@ fun BookingDetailDialog(
     var showContactSheetInfo by remember { mutableStateOf(false) }
     var isFirst by remember { mutableStateOf(true) }
     var isShowDetail by remember { mutableStateOf(false) }
+    var showTicket by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (isFirst) {
@@ -445,8 +446,7 @@ fun BookingDetailDialog(
                 if (booking.status == "CONFIRMED") {
                     Button(
                         onClick = {
-                            //isShowTicket(true)
-                            //isShowDetail(false)
+                            showTicket = true
                         },
                         modifier = Modifier
                             .height(48.dp)
@@ -503,6 +503,10 @@ fun BookingDetailDialog(
 
     if (isShowDetail) {
         PaymentDialog(isShowDetail = { isShowDetail = it }, booking, viewModel)
+    }
+
+    if (showTicket) {
+        SeatDetailDialog(booking.tripType, isShowDetail = { isShowDetail = it }, isTicket = { showTicket = it }, booking, uiFlights, seats)
     }
 }
 

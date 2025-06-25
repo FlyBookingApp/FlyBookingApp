@@ -527,7 +527,7 @@ fun PaymentScreen(
     }
 
     if (isShowTicket) {
-        SeatDetailDialog(tripType = booking.tripType ,isShowDetail = {null}, isTicket = { isShowTicket = it })
+        //SeatDetailDialog(tripType = booking.tripType ,isShowDetail = {null}, isTicket = { isShowTicket = it })
     }
 }
 

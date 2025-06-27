@@ -62,7 +62,10 @@ fun AppNavigation(modifier: Modifier = Modifier){
             LoginScreen(
                 onNavigateToMain = {
                     navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+                        popUpTo("login") {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToRegister = {
@@ -100,6 +103,9 @@ fun AppNavigation(modifier: Modifier = Modifier){
                 onNavigateToMain = { request ->
                     sharedSearchViewModel.setRequest(request)
                     navController.navigate("flightList")
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
                 }
             )
         }
@@ -128,7 +134,13 @@ fun AppNavigation(modifier: Modifier = Modifier){
         composable ("passengerInfor"){
             PassengerInfoScreen(
                 request = bookingViewModel.request.collectAsState().value,
-                navController = navController,
+                onNavigateBackToHome = {
+                    navController.navigate("home") {
+                        popUpTo("home") {
+                            inclusive = true
+                        }
+                    }
+                },
                 onNavigateBack = {
                     navController.navigateUp()
                 },
@@ -145,6 +157,16 @@ fun AppNavigation(modifier: Modifier = Modifier){
                 onNavigateToMain = { request ->
                     bookingViewModel.bookingIdRequest(request)
                     navController.navigate("payment")
+                },
+                onNavigateBackToHome = {
+                    navController.navigate("home") {
+                        popUpTo("home") {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
                 }
             )
         }
@@ -158,7 +180,9 @@ fun AppNavigation(modifier: Modifier = Modifier){
 
         composable("myTicket") {
             MyTicketScreen(
-
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
             )
         }
 

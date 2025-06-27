@@ -75,16 +75,6 @@ fun AccountScreen(
                     fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier
-                        .padding(start = 5.dp)
-                        .clickable {
-                            onNavigateBack()
-                        },
-                    text = "✕",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))

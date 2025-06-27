@@ -1,7 +1,9 @@
 package com.example.veyu.ui.screen.my_ticket
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -171,16 +173,18 @@ class MyTicketViewModel @Inject constructor(
         }
     }
 
-    fun onDelete(bookingId: Long) {
+    fun onDelete(bookingId: Long, context: Context) {
         viewModelScope.launch {
             try {
                 val result = repositoryBooking.deleteBooking(bookingId)
                 Log.d("PaymentViewModel", "deleteBooking: ${result}")
 
                 _bookingList.value = _bookingList.value.filter { it.bookingId != bookingId }
+                Toast.makeText(context, "Hủy booking thành công!!", Toast.LENGTH_SHORT).show()
 
             } catch (e: Exception) {
                 Log.e("PaymentViewModel", "deleteBooking error: ${e.message}")
+                Toast.makeText(context, "Lỗi: Hủy booking thất bại!!", Toast.LENGTH_SHORT).show()
             }
         }
     }

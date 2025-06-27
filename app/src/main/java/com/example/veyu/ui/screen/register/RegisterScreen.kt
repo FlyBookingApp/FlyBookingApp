@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -91,7 +92,8 @@ fun RegisterScreen(
                         onValueChange = viewModel::onEmailChange,
                         leadingIcon = R.drawable.ic_email,
                         iconSize = 30.dp,
-                        hint = "Nhập Email"
+                        hint = "Nhập Email",
+                        keyboardType = KeyboardOptions(keyboardType = KeyboardType.Email)
                     )
 
                     RegisterTextField(
@@ -120,8 +122,9 @@ fun RegisterScreen(
                         onValueChange = viewModel::onPhoneChange,
                         leadingIcon = R.drawable.ic_call,
                         iconSize = 30.dp,
+                        isPhone = true,
                         hint = "Số điện thoại",
-                        keyboardType = KeyboardOptions.Default.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone)
+                        keyboardType = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -188,14 +191,23 @@ fun RegisterTextField(
     leadingIcon: Int,
     hint: String,
     isPassword: Boolean = false,
+    isPhone: Boolean = false,
     keyboardType: KeyboardOptions = KeyboardOptions.Default,
     iconSize: Dp = 20.dp
 ) {
+    var passwordVisible by remember { mutableStateOf(!isPassword) }
     Text(text = label, fontSize = 14.sp, color = Color.Black)
 
     TextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = {
+            if (isPhone && (it.all { c -> c.isDigit() } && it.length <= 10)) {
+                onValueChange(it)
+            }
+            if (!isPhone) {
+                onValueChange(it)
+            }
+        },
         placeholder = {
             val isDark = isSystemInDarkTheme()
             Text(
@@ -211,8 +223,22 @@ fun RegisterTextField(
                 contentScale = ContentScale.Fit
             )
         },
+        trailingIcon = {
+            if (isPassword) {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (passwordVisible) R.drawable.ic_visibility
+                            else R.drawable.ic_visibility_off
+                        ),
+                        contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu",
+                        tint = Color.Gray
+                    )
+                }
+            }
+        },
         singleLine = true,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = keyboardType,
         shape = RoundedCornerShape(50),
         colors = TextFieldDefaults.colors(

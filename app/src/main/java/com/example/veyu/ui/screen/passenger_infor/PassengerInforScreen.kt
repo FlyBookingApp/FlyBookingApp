@@ -44,7 +44,7 @@ import com.example.veyu.domain.model.BookingRequest
 fun PassengerInfoScreen(
     request: BookingRequest?,
     viewModel: PassengerInforViewModel = hiltViewModel(),
-    navController: NavController,
+    onNavigateBackToHome: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToMain: (Booking) -> Unit,
     ) {
@@ -106,35 +106,42 @@ fun PassengerInfoScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 35.dp)
+                    .padding(horizontal = 20.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.clickable { onNavigateBack() }
-                )
-                Spacer(modifier = Modifier.width(3.dp))
-                Text(
-                    modifier = Modifier.padding(start = 5.dp),
-                    text = "Thông tin tài khoản",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
+                Row(
                     modifier = Modifier
-                        .padding(start = 5.dp)
-                        .clickable {
-                            onNavigateBack()
-                        },
-                    text = "✕",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
+                        .fillMaxWidth()
+                        .padding(top = 35.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable { onNavigateBack() }
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        modifier = Modifier.padding(start = 5.dp),
+                        text = "Thông tin hành khách",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 5.dp)
+                            .clickable {
+                                onNavigateBackToHome()
+                            },
+                        text = "✕",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
             }
+
 
             Spacer(modifier = Modifier.height(60.dp))
 
@@ -285,7 +292,8 @@ fun PassengerInfoScreen(
                                     status = "HOLD",
                                     tripType = viewModel.flightBookingType.isRoundTrip,
                                     passengerInfo = bookingState.tickets.map { it.passenger },
-                                    contactInfo = bookingState.contact
+                                    contactInfo = bookingState.contact,
+                                    totalPrice = viewModel.getTotalPrice()
                                 )
 
                                 Log.d("PassengerInfoScreen", "PassengerInfoScreen: ${booking.toString()}")
@@ -465,7 +473,6 @@ fun PassengerInputForm(
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left side: Text + Radio Buttons
             Text(
                 "Giới tính:",
                 fontWeight = FontWeight.Bold,
@@ -573,19 +580,6 @@ fun PassengerInputForm(
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = info.phoneNumber,
-            onValueChange = {
-                if (it.all { c -> c.isDigit() } && it.length <= 10) {
-                    info = info.copy(phoneNumber = it)
-                }
-            },
-            label = { Text("Số điện thoại") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
             value = info.idCard,
             onValueChange = {
                 if (it.all { c -> c.isLetterOrDigit() } && it.length <= 12) {
@@ -656,6 +650,7 @@ fun ContactInputForm(
                 }
             },
             label = { Text("Số điện thoại") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))

@@ -57,7 +57,9 @@ import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
 fun ChooseSeatScreen(
     viewModel: ChooseSeatViewModel = hiltViewModel(),
     request: Booking?,
-    onNavigateToMain: (Long) -> Unit
+    onNavigateToMain: (Long) -> Unit,
+    onNavigateBackToHome: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val booking by viewModel.booking.collectAsState()
 
@@ -93,37 +95,40 @@ fun ChooseSeatScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 35.dp)
+                    .padding(horizontal = 20.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.clickable
-                    {
-                        //onNavigateBack()
-                    }
-                )
-                Spacer(modifier = Modifier.width(3.dp))
-                Text(
-                    modifier = Modifier.padding(start = 5.dp),
-                    text = "Thông tin tài khoản",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
+                Row(
                     modifier = Modifier
-                        .padding(start = 5.dp)
-                        .clickable {
-                            //onNavigateBack()
-                        },
-                    text = "X",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
+                        .fillMaxWidth()
+                        .padding(top = 35.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable { onNavigateBack() }
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        modifier = Modifier.padding(start = 5.dp),
+                        text = "Chọn chỗ ngồi",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 5.dp)
+                            .clickable {
+                                onNavigateBackToHome()
+                            },
+                        text = "✕",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(85.dp))

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MyTicketScreen(
     viewModel: MyTicketViewModel = hiltViewModel(),
-
+    onNavigateBack: () -> Unit
     ) {
     val bookingList by viewModel.bookingList.collectAsState()
     val uiFlights by viewModel.uiFlights.collectAsState()
@@ -67,41 +68,33 @@ fun MyTicketScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 35.dp)
+                    .padding(horizontal = 20.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.clickable {
-                        //onNavigateBack()
-                    }
-                )
-                Spacer(modifier = Modifier.width(3.dp))
-                Text(
-                    modifier = Modifier.padding(start = 5.dp),
-                    text = "Quản lý vé",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
+                // Header
+                Row(
                     modifier = Modifier
-                        .padding(start = 5.dp)
-                        .clickable {
-                            //onNavigateBack()
-                        },
-                    text = "✕",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-
-                Spacer(modifier = Modifier.height(47.dp))
-
+                        .fillMaxWidth()
+                        .padding(top = 35.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable { onNavigateBack() }
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        modifier = Modifier.padding(start = 5.dp),
+                        text = "Quản lý vé",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                }
             }
+            Spacer(modifier = Modifier.height(22.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -245,6 +238,7 @@ fun ItemBooking(
     )
     {
         if (isNoPayment) {
+            val context = LocalContext.current
             Image(
                 painter = painterResource(R.drawable.buttondelete),
                 contentDescription = null,
@@ -253,7 +247,7 @@ fun ItemBooking(
                     .padding(end = 8.dp)
                     .padding(bottom = 5.dp)
                     .clickable {
-                        viewModel.onDelete(booking.bookingId)
+                        viewModel.onDelete(booking.bookingId, context)
                     }
             )
         }

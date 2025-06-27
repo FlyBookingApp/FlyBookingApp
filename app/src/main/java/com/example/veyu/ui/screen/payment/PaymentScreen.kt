@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -88,7 +89,7 @@ fun PaymentScreen(
     var showContactSheet by remember { mutableStateOf(false) }
 
     var isShowDetail by remember { mutableStateOf(false) }
-    var isShowTicket by remember { mutableStateOf(false) }
+    var showTicket by remember { mutableStateOf(false) }
 
     LaunchedEffect(request) {
         request?.let {
@@ -132,33 +133,38 @@ fun PaymentScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 35.dp)
-                    .padding(horizontal = 10.dp)
+                    .padding(horizontal = 20.dp)
             ) {
-                Text(
-                    modifier = Modifier.padding(start = 5.dp),
-                    text = "Thanh toán",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
+                Row(
                     modifier = Modifier
-                        .padding(start = 5.dp)
-                        .clickable {
-                            navController.navigate("home") {
-                                popUpTo("home") {
-                                    inclusive = true
+                        .fillMaxWidth()
+                        .padding(top = 35.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(start = 5.dp),
+                        text = "Thanh toán",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 5.dp)
+                            .clickable {
+                                navController.navigate("home") {
+                                    popUpTo("home") {
+                                        inclusive = true
+                                    }
                                 }
-                            }
-                        },
-                    text = "✕",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
+                            },
+                        text = "✕",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(60.dp))
@@ -431,7 +437,11 @@ fun PaymentScreen(
                         )
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            CountdownText(booking.createdAt)
+                            if (booking.status == "PENDING") {
+                                CountdownText(booking.createdAt, viewModel, booking.bookingId)
+                            } else {
+                                Text(text = "00:00:00", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                            }
                         }
                     }
                 }
@@ -482,9 +492,10 @@ fun PaymentScreen(
                             Text("Thanh toán", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
 
+                        val context = LocalContext.current
                         Button(
                             onClick = {
-                                viewModel.onDelete(booking.bookingId)
+                                viewModel.onDelete(booking.bookingId, context)
                             },
                             modifier = Modifier
                                 .height(48.dp)
@@ -500,20 +511,27 @@ fun PaymentScreen(
                         }
                     }
                 } else if (booking.status == "CONFIRMED") {
-                    Button(
-                        onClick = {
-                            //
-                        },
+                    Column(
                         modifier = Modifier
-                            .height(48.dp)
-                            .fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF63C0FF),
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                            .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp)
+                            .fillMaxWidth()
+                            .background(Color.White)
                     ) {
-                        Text(text = "Xem chi tiết vé", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Button(
+                            onClick = {
+                                showTicket = true
+                            },
+                            modifier = Modifier
+                                .height(48.dp)
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF63C0FF),
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(text = "Xem chi tiết vé", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 } else {
                     Spacer(modifier = Modifier.height(48.dp))
@@ -526,8 +544,8 @@ fun PaymentScreen(
         PaymentDialog(isShowDetail = { isShowDetail = it }, booking, viewModel)
     }
 
-    if (isShowTicket) {
-        //SeatDetailDialog(tripType = booking.tripType ,isShowDetail = {null}, isTicket = { isShowTicket = it })
+    if (showTicket) {
+        SeatDetailDialog(booking.tripType, isShowDetail = { isShowDetail = it }, isTicket = { showTicket = it }, booking, uiFlights, seats)
     }
 }
 
@@ -652,15 +670,6 @@ fun PassengerInputForm(
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = info.phoneNumber,
-            onValueChange = { info = info.copy(phoneNumber = it) },
-            label = { Text("Số điện thoại") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
             value = info.idCard,
             onValueChange = { info = info.copy(idCard = it) },
             label = { Text("CMND/CCCD/Mã định danh") },
@@ -769,7 +778,7 @@ fun parseContactInfo(input: String): ContactInfo {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CountdownText(targetTimeStr: String) {
+fun CountdownText(targetTimeStr: String, viewModel: DetailBookingViewModel, bookingId: Long) {
     if (targetTimeStr.isEmpty()) {
         Text(text = "", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
         return
@@ -781,7 +790,7 @@ fun CountdownText(targetTimeStr: String) {
         LocalDateTime.parse(targetTimeStr, formatter)
     } catch (e: Exception) {
         // Trường hợp parse lỗi, hiển thị "00:00:00"
-        Text(text = "00:00:00", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+        Text(text = "00:15:00", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
         return
     }
 
@@ -812,5 +821,10 @@ fun CountdownText(targetTimeStr: String) {
         fontSize = 16.sp,
         color = Color.White
     )
+
+    val context = LocalContext.current
+    if (String.format("%02d:%02d:%02d", hours, minutes, seconds) == "00:00:00") {
+        viewModel.onDelete(bookingId, context)
+    }
 }
 

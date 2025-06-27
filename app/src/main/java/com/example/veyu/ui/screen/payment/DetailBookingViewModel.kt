@@ -1,7 +1,9 @@
 package com.example.veyu.ui.screen.payment
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -185,40 +187,48 @@ class DetailBookingViewModel @Inject constructor(
         Log.d("PaymentViewModel", "_uiFlights: ${_uiFlights.value.toString()}")
     }
 
-    fun onConfirm(bookingId: Long, totalAmount: Double) {
+    fun onConfirm(bookingId: Long, totalAmount: Double, context: Context) {
         viewModelScope.launch {
             val userId = fetchUserFromLocalStoreSuspend() ?: return@launch
 
-            val confirmed = confirmBooking(bookingId)
+            val confirmed = confirmBooking(bookingId, context)
             if (!confirmed) {
                 Log.e("PaymentViewModel", "Xác nhận booking thất bại, dừng lại.")
                 return@launch
             }
 
-            val ticketGenerated = generateTicket(bookingId)
+            val ticketGenerated = generateTicket(bookingId, context)
             if (!ticketGenerated) {
                 Log.e("PaymentViewModel", "Tạo vé thất bại, dừng lại.")
                 return@launch
             }
 
-            createdPaymentTransaction(bookingId, userId, totalAmount)
-
+            createdPaymentTransaction(bookingId, userId, totalAmount, context)
+            Toast.makeText(context, "Thanh toán thành công!!", Toast.LENGTH_SHORT).show()
             Log.d("PaymentViewModel", "Hoàn tất quy trình xác nhận booking.")
         }
     }
 
-    fun onDelete(bookingId: Long) {
+    fun onDelete(bookingId: Long, context: Context) {
         viewModelScope.launch {
             try {
                 val result = repositoryBooking.deleteBooking(bookingId)
+                val response = result.getOrNull()
+                val isConfirmed = response == "Booking cancelled successfully"
+
+                if (isConfirmed) {
+                    _booking.value = _booking.value.copy(status = "CANCELLED")
+                }
                 Log.d("PaymentViewModel", "deleteBooking: ${result.toString()}")
+                Toast.makeText(context, "Hủy booking thành công!!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("PaymentViewModel", "deleteBooking error: ${e.message}")
+                Toast.makeText(context, "Lỗi: Hủy booking thất bại!!", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    suspend fun confirmBooking(bookingId: Long): Boolean {
+    suspend fun confirmBooking(bookingId: Long, context: Context): Boolean {
         return try {
             val result = repositoryBooking.confirmBooking(bookingId)
             val response = result.getOrNull()
@@ -231,23 +241,25 @@ class DetailBookingViewModel @Inject constructor(
             isConfirmed
         } catch (e: Exception) {
             Log.e("PaymentViewModel", "confirmBooking error: ${e.message}")
+            Toast.makeText(context, "Lỗi: Thanh toán thất bại!!", Toast.LENGTH_SHORT).show()
             false
         }
     }
 
-    suspend fun generateTicket(bookingId: Long): Boolean {
+    suspend fun generateTicket(bookingId: Long, context: Context): Boolean {
         return try {
             val result = repositoryTicket.generateTicket(bookingId)
             Log.d("PaymentViewModel", "generateTicket: ${result.toString()}")
             val response = result.getOrNull()
             true
         } catch (e: Exception) {
+            Toast.makeText(context, "Lỗi: Thanh toán thất bại!!", Toast.LENGTH_SHORT).show()
             Log.e("PaymentViewModel", "generateTicket error: ${e.message}")
             false
         }
     }
 
-    fun createdPaymentTransaction(bookingIdRq: Long, userIdRq: Long, totalAmount: Double) {
+    fun createdPaymentTransaction(bookingIdRq: Long, userIdRq: Long, totalAmount: Double, context: Context) {
         viewModelScope.launch {
             try {
                 val request = PaymentTransactionRq (
@@ -261,6 +273,7 @@ class DetailBookingViewModel @Inject constructor(
 
                 _isError.value = false
             } catch (e: Exception) {
+                Toast.makeText(context, "Lỗi: Thanh toán thất bại!!", Toast.LENGTH_SHORT).show()
                 Log.e("PaymentViewModel", "createPaymentTransaction error: ${e.message}")
                 _isError.value = true
             }

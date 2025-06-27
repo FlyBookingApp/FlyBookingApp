@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -156,6 +157,7 @@ fun PaymentDialog(
 
                     Spacer(modifier = Modifier.weight(1f))
 
+                    val context = LocalContext.current
                     Button(
                         onClick = {
                             val totalAmount =  booking.totalPrice
@@ -163,7 +165,7 @@ fun PaymentDialog(
                             .replace("đ", "")
                             .trim()
                             .toDouble()
-                            viewModel.onConfirm(booking.bookingId, totalAmount)
+                            viewModel.onConfirm(booking.bookingId, totalAmount, context)
 
                             isShowDetail(false)
                         },

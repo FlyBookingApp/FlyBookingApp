@@ -62,8 +62,17 @@ class ChooseSeatViewModel @Inject constructor(
     private var _bookingId: MutableStateFlow<Long?> = MutableStateFlow(null)
     val bookingId: StateFlow<Long?> = _bookingId
 
+    private val price = MutableStateFlow(0.0)
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun loadingSeats(request: Booking) {
+        _seatsBusiness = emptyList()
+        _seatsEconomy = emptyList()
+        _seatsPremiuEconomy = emptyList()
+        _seatsBss.value = emptyList()
+        _seatsEmy.value = emptyList()
+        _seatsPE.value = emptyList()
+
         if (!request.tripType) {
             fetchSeatsFromServer(request.flightIds.first())
         } else {
@@ -152,8 +161,10 @@ class ChooseSeatViewModel @Inject constructor(
             passengerCount = request.passengerCount,
             status = request.status,
             passengerInfo = request.passengerInfo,
-            contactInfo = request.contactInfo
+            contactInfo = request.contactInfo,
+            totalPrice = request.totalPrice
         )
+        price.value = changeFormatPrice(request.totalPrice)
         Log.d("ChooseSeatViewModel", "Updated booking: ${_booking.value.toString()}")
     }
 
@@ -277,15 +288,15 @@ class ChooseSeatViewModel @Inject constructor(
         return "%,dđ".format(longPrice).replace(",", ".")
     }
 
-    private fun changeFormatPrice(price: String): Long {
+    private fun changeFormatPrice(price: String): Double {
         return price.replace(".", "")
             .replace("đ", "")
             .replace(",", "")
             .trim()
-            .toIntOrNull()?.toLong() ?: 0
+            .toIntOrNull()?.toDouble() ?: 0.0
     }
 
-    private fun nextToBooking() {
+    private fun nextToBooking(context: Context) {
         viewModelScope.launch {
             // Lấy userId trước
             val name = userPreferences.userName.first()
@@ -303,7 +314,7 @@ class ChooseSeatViewModel @Inject constructor(
                     }
 
                     // Tạo booking
-                    createBooking()
+                    createBooking(context)
                 }.onFailure {
                     Log.e("ChooseSeatViewModel", "Error fetch user: ${it.message}")
                 }
@@ -320,7 +331,7 @@ class ChooseSeatViewModel @Inject constructor(
         if (!isRoundTrip && enoughSeats) {
             updateBookingWithChosenSeats()
             _seatsTempIds.value = _seatsTempIds.value + _booking.value.seatIds
-            nextToBooking()
+            nextToBooking(context)
             return true
         }
 
@@ -333,7 +344,7 @@ class ChooseSeatViewModel @Inject constructor(
             } else if (enoughSeats) {
                 updateBookingWithChosenSeats()
                 _seatsTempIds.value = _seatsTempIds.value + _booking.value.seatIds
-                nextToBooking()
+                nextToBooking(context)
                 return true
             }
         }
@@ -354,7 +365,7 @@ class ChooseSeatViewModel @Inject constructor(
         val premium = _seatsPremiuEconomy.filter { it.status == "CHOOSE" }.map { changeFormatPrice(it.price ?: "0") }
 
         // Tính tổng giá
-        val totalPrice = (business + economy + premium).sum() + if(!_isDeparture.value) totalPriceTemp.value else 0.0
+        val totalPrice = (business + economy + premium).sum() + if(!_isDeparture.value) totalPriceTemp.value else 0.0 + if(_isDeparture.value) price.value else 0.0
 
         if (_isDeparture.value) {
             totalPriceTemp.value = totalPrice
@@ -366,7 +377,7 @@ class ChooseSeatViewModel @Inject constructor(
         )
     }
 
-    private suspend fun createBooking() {
+    private suspend fun createBooking(context: Context) {
         bookingRepository.createBooking(
             BookingRequest(
                 userId = _booking.value.userId,
@@ -392,8 +403,10 @@ class ChooseSeatViewModel @Inject constructor(
         ).onSuccess {
             _bookingId.value = it.id
             Log.d("ChooseSeatViewModel", "Booking created with ID: $_bookingId")
+            Toast.makeText(context, "Tạo booking thành công!!", Toast.LENGTH_SHORT).show()
         }.onFailure {
             Log.e("ChooseSeatViewModel", "API error: ${it.message}")
+            Toast.makeText(context, "Lỗi: Không thể tạo booking", Toast.LENGTH_SHORT).show()
         }
     }
 }

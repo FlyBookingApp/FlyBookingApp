@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -106,6 +108,7 @@ fun LoginScreen(
                                 color = Color.Black
                             )
                         },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         leadingIcon = {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_email),
@@ -131,6 +134,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    var passwordVisible by remember { mutableStateOf(false) }
                     Text(text = "Mật khẩu", fontSize = 14.sp, color = Color.Black)
                     TextField(
                         value = state.password,
@@ -149,7 +153,19 @@ fun LoginScreen(
                                 contentScale = ContentScale.Fit
                             )
                         },
-                        visualTransformation = PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (passwordVisible) R.drawable.ic_visibility
+                                        else R.drawable.ic_visibility_off
+                                    ),
+                                    contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu",
+                                    tint = Color.Gray
+                                )
+                            }
+                        },
+                        visualTransformation = if (!passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
                         shape = RoundedCornerShape(50),

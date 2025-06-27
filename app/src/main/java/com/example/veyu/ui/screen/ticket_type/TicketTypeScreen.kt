@@ -10,6 +10,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,7 +43,8 @@ import java.util.Locale
 @Composable
 fun TicketTypeScreen(
     onNavigateToMain: (FlightSearchRequest) -> Unit,
-    viewModel: TicketTypeViewModel = hiltViewModel()
+    viewModel: TicketTypeViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     val showLocationPicker = remember { mutableStateOf(false) }
@@ -72,6 +75,32 @@ fun TicketTypeScreen(
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 35.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.clickable { onNavigateBack() }
+                )
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                    modifier = Modifier.padding(start = 5.dp),
+                    text = "Tìm chuyến bay",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
 
         Column(
             modifier = Modifier

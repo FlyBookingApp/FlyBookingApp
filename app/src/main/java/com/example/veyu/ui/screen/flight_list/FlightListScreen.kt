@@ -55,10 +55,14 @@ import com.example.veyu.R
 import com.example.veyu.data.repository.FlightRepository
 import com.example.veyu.domain.model.BookingRequest
 import com.example.veyu.domain.model.FlightSearchRequest
+import com.example.veyu.ui.screen.my_ticket.NothingItemInHere
 import com.example.veyu.ui.screen.ticket_type.TicketTypeViewModel
 import com.example.veyu.ui.screen.ticket_type.toReadableString
 import com.example.veyu.ui.theme.LightBlue
 import com.example.veyu.ui.theme.LightGrayBg
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -76,6 +80,8 @@ fun FlightListScreen(
     onNavigateBack: () -> Unit,
     onNavigateBackToHome: () -> Unit
 ) {
+    val isLoading by viewModel.isLoading.collectAsState()
+
     val currentFilter by viewModel.currentFilter.collectAsState()
 
     val isDeparture by viewModel.isDeparture.collectAsState()
@@ -154,7 +160,7 @@ fun FlightListScreen(
             ) {
                 FlightList(flights = flights, onFlightClick = { flight ->
                     selectedFlight = flight
-                })
+                }, isLoading = isLoading)
 
                 BottomBarWithSheet(
                     modifier = Modifier
@@ -233,7 +239,7 @@ fun TopHeader(flights: List<FlightInfo> = emptyList(), flightBookingType: Flight
             }
 
         } else {
-            Text(text = "Không tìm thấy chuyến bay")
+            Text(text = "Không tìm thấy chuyến bay nào")
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -281,15 +287,45 @@ fun DateItem(label: String, date: String, color: Color, modifier: Modifier) {
 }
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FlightList(flights: List<FlightInfo>, onFlightClick: (FlightInfo) -> Unit) {
+fun FlightList(flights: List<FlightInfo>, onFlightClick: (FlightInfo) -> Unit, isLoading: Boolean) {
     LazyColumn(modifier = Modifier
         .fillMaxSize()
     ) {
+        if (isLoading) {
+            items(5) {
+                FlightSkeletonItem()
+            }
+        }
+
+        if (flights.isEmpty()) {
+            item {
+                NothingItemInHere("Không tìm thấy chuyến bay", "Hãy thử lại sau, hoặc chọn ngày khác")
+            }
+        }
         items(flights.filter { !it.isChoiced }) { flight ->
             FlightItem(flight, onClick = { onFlightClick(flight) })
         }
     }
 }
+
+@Composable
+fun FlightSkeletonItem() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+            .height(150.dp)
+            .placeholder(
+                visible = true,
+                color = Color.LightGray.copy(alpha = 0.4f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White.copy(alpha = 0.6f)
+                )
+            )
+    ) {}
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FlightItem(flight: FlightInfo, onClick: () -> Unit) {

@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.placeholder.shimmer
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -51,6 +53,8 @@ import com.example.veyu.data.repository.UserRepository
 import com.example.veyu.domain.model.Booking
 import com.example.veyu.domain.model.BookingRequest
 import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -250,7 +254,13 @@ fun ChooseSeatScreen(
                     .fillMaxWidth()
             )
 
-            LazySeatBox(viewModel, seatsBusiness, seatsEconomy, seatsPremium, Modifier.weight(1f).padding(horizontal = 10.dp))
+            LazySeatBox(
+                viewModel,
+                seatsBusiness,
+                seatsEconomy,
+                seatsPremium,
+                Modifier.weight(1f).padding(horizontal = 10.dp)
+            )
 
             Divider(
                 color = Color.LightGray,
@@ -322,8 +332,14 @@ fun LazySeatBox(viewModel: ChooseSeatViewModel,seatsBusiness: List<Seat>, seatsE
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        item {
-            SelectableListSeat("Hạng Thương gia\n(${seatsBusiness.firstOrNull()?.price}/ghế)", seatsBusiness, viewModel)
+        if (seatsBusiness.size == 0) {
+            item {
+                SeatLoadingSkeleton()
+            }
+        } else {
+            item {
+                SelectableListSeat("Hạng Thương gia\n(${seatsBusiness.firstOrNull()?.price}/ghế)", seatsBusiness, viewModel)
+            }
         }
 
         item {
@@ -336,8 +352,14 @@ fun LazySeatBox(viewModel: ChooseSeatViewModel,seatsBusiness: List<Seat>, seatsE
             )
         }
 
-        item {
-            SelectableListSeat("Hạng Phổ thông đặc biệt\n(${seatsPremium.firstOrNull()?.price}/ghế)", seatsPremium, viewModel)
+        if (seatsPremium.size == 0) {
+            item {
+                SeatLoadingSkeleton()
+            }
+        } else {
+            item {
+                SelectableListSeat("Hạng Phổ thông đặc biệt\n(${seatsPremium.firstOrNull()?.price}/ghế)", seatsPremium, viewModel)
+            }
         }
 
         item {
@@ -350,8 +372,14 @@ fun LazySeatBox(viewModel: ChooseSeatViewModel,seatsBusiness: List<Seat>, seatsE
             )
         }
 
-        item {
-            SelectableListSeat("Hạng Phổ thông\n(${seatsEconomy.firstOrNull()?.price}/ghế)", seatsEconomy, viewModel)
+        if (seatsEconomy.size == 0) {
+            item {
+                SeatLoadingSkeleton()
+            }
+        } else {
+            item {
+                SelectableListSeat("Hạng Phổ thông\n(${seatsEconomy.firstOrNull()?.price}/ghế)", seatsEconomy, viewModel)
+            }
         }
 
         item {
@@ -467,6 +495,73 @@ fun SelectableListSeat(title: String, seats: List<Seat>, viewModel: ChooseSeatVi
                             status = "EMPTY",
                             onClick = { viewModel.onClickSeat("", "") }
                         )
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+fun SeatLoadingSkeleton() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 25.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = " ",
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            modifier = Modifier
+                .width(250.dp)
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(4.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White.copy(alpha = 0.6f)
+                )
+            )
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(25.dp)
+    ) {
+        repeat(4) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+
+                repeat(4) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .placeholder(
+                                visible = true,
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White.copy(alpha = 0.6f)
+                                ),
+                                color = Color.LightGray
+                            )
+                    )
+
+                    if (index == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    } else if (index < 3) {
+                        Spacer(modifier = Modifier.width(25.dp))
                     }
                 }
 

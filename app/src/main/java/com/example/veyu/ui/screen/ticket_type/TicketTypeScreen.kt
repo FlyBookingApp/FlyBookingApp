@@ -403,13 +403,14 @@ fun TicketTypeScreen(
                 LocationPickerSheet(
                     currentDeparture = state.selectedDeparture,
                     currentDestination = state.selectedDestination,
+                    viewModel,
                     airportOptions = state.airportLocations,
                     onClose = { showLocationPicker.value = false },
                     onSelect = { dep, dest ->
                         viewModel.onSelectDeparture(dep)
                         viewModel.onSelectDestination(dest)
                         showLocationPicker.value = false
-                    },modifier = Modifier.align(Alignment.Center)
+                    }, modifier = Modifier.align(Alignment.Center)
                 )
             }
         }

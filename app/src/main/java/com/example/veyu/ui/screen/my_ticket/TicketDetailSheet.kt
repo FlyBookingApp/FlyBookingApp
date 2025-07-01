@@ -53,6 +53,9 @@ import com.example.veyu.ui.screen.payment.Ticket
 import com.example.veyu.ui.screen.payment.TicketViewModel
 import com.example.veyu.ui.screen.seat.BookingNew
 import com.example.veyu.ui.screen.seat.Seat
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 
 @Composable
@@ -65,6 +68,8 @@ fun SeatDetailDialog(
     seats: List<Seat>,
     viewModel: TicketViewModel = hiltViewModel()
 ) {
+    val isLoading by viewModel.isLoading.collectAsState()
+
     var isFirst by remember { mutableStateOf(true) }
     var isInitFirst by remember { mutableStateOf(true) }
 
@@ -139,16 +144,20 @@ fun SeatDetailDialog(
             ) {
                 val flightNoTemp: String?
 
-                if (isFirst) {
-                    FlightItem(flight = uiFlights.first(), isReturnTrip = false)
-                    flightNoTemp = uiFlights.first().code
+                if (isLoading) {
+                    FlightSkeletonItem()
                 } else {
-                    FlightItem(flight = uiFlights[1], isReturnTrip = true)
-                    flightNoTemp = uiFlights[1].code
-                }
+                    if (isFirst) {
+                        FlightItem(flight = uiFlights.first(), isReturnTrip = false)
+                        flightNoTemp = uiFlights.first().code
+                    } else {
+                        FlightItem(flight = uiFlights[1], isReturnTrip = true)
+                        flightNoTemp = uiFlights[1].code
+                    }
 
-                if (flightNoTemp != null) {
-                    flightNo = flightNoTemp
+                    if (flightNoTemp != null) {
+                        flightNo = flightNoTemp
+                    }
                 }
             }
 
@@ -191,6 +200,10 @@ fun SeatDetailDialog(
                         .border(1.5.dp, Color.Black, RoundedCornerShape(15.dp))
 
                 ){
+                    if (isLoading) {
+                        items(2) { TicketSkeletonItemDt() }
+                    }
+
                     if (isFirst) {
                         items(departureTickets.size) { index ->
                             Log.d("TicketViewModel", "departureTickets: ${departureTickets.toString()}")
@@ -338,5 +351,48 @@ fun OtherTicketButton(
 
         }
     }
+
 }
 
+@Composable
+fun TicketSkeletonItemDt() {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 20.dp, vertical = 6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.3f),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White.copy(alpha = 0.6f)
+                    )
+                )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+fun FlightSkeletonItem() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .height(40.dp)
+            .placeholder(
+                visible = true,
+                color = Color.LightGray.copy(alpha = 0.4f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White.copy(alpha = 0.6f)
+                )
+            )
+    ) {}
+}

@@ -35,6 +35,9 @@ class MyTicketViewModel @Inject constructor(
 ): ViewModel() {
     private var userId: Long? = null
 
+    private var _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     private var _bookingList = MutableStateFlow<List<BookingNew>> (emptyList())
     val bookingList: StateFlow<List<BookingNew>> = _bookingList
 
@@ -47,6 +50,7 @@ class MyTicketViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     fun init(status: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             val userId = fetchUserFromLocalStoreSuspend() ?: return@launch
 
             getListBookingByUserIdSuspend(userId, status)
@@ -59,6 +63,7 @@ class MyTicketViewModel @Inject constructor(
             }
 
             Log.d("ProfileViewModel", "_uiFlights: ${_uiFlights.value.toString()}")
+            _isLoading.value = false
         }
     }
 
@@ -187,6 +192,10 @@ class MyTicketViewModel @Inject constructor(
                 Toast.makeText(context, "Lỗi: Hủy booking thất bại!!", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    fun deleteInDetal(bookingId: Long) {
+        _bookingList.value = _bookingList.value.filter { it.bookingId != bookingId }
     }
 
     private fun formatPrice(price: Double?): String {

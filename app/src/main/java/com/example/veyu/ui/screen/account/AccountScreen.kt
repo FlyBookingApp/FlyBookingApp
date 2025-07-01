@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.veyu.R
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -99,11 +102,20 @@ fun AccountScreen(
                     .align(Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = user?.username ?: "Đang tải...",
+                    text = user?.username ?: "                                 ",
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .placeholder(
+                            visible = user == null,
+                            color = Color.LightGray.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(4.dp),
+                            highlight = PlaceholderHighlight.shimmer(
+                                highlightColor = Color.White.copy(alpha = 0.6f)
+                            )
+                        )
                 )
             }
 
@@ -130,8 +142,18 @@ fun AccountScreen(
                         fontSize = 16.sp
                     )
                     Text(
-                        text = user?.email ?: "Đang tải...",
-                        fontSize = 16.sp
+                        text = user?.email ?:"",
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .width(200.dp)
+                            .placeholder(
+                                visible = user == null,
+                                color = Color.LightGray.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(4.dp),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White.copy(alpha = 0.6f)
+                                )
+                            )
                     )
                 }
 
@@ -152,8 +174,18 @@ fun AccountScreen(
                         fontSize = 16.sp
                     )
                     Text(
-                        text = user?.phone ?: "Đang tải...",
-                        fontSize = 16.sp
+                        text = user?.phone ?: "",
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .width(200.dp)
+                            .placeholder(
+                                visible = user == null,
+                                color = Color.LightGray.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(4.dp),
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color.White.copy(alpha = 0.6f)
+                                )
+                            )
                     )
                 }
             }

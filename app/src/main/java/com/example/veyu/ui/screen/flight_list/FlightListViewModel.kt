@@ -38,6 +38,9 @@ class FlightListViewModel @Inject constructor(
     private val _flights = MutableStateFlow<List<FlightInfo>>(emptyList())
     val flights: StateFlow<List<FlightInfo>> = _flights
 
+    private var _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     private val _currentFilter = MutableStateFlow<FlightFilter?>(
         FlightFilter(
             minPrice = 0,
@@ -102,6 +105,7 @@ class FlightListViewModel @Inject constructor(
         departureDate: String
     ) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
                 val result = repository.searchFlights(departureCode, arrivalCode, departureDate)
                 val flightResponses = result.getOrNull() ?: emptyList()
@@ -143,6 +147,7 @@ class FlightListViewModel @Inject constructor(
 
                 applyCurrentFilterAndSort()
 
+                _isLoading.value = false
             } catch (e: Exception) {
                 Log.e("FlightListViewModel", "API error: ${e.message}")
                 _allFlights = emptyList()

@@ -68,6 +68,7 @@ import com.example.veyu.ui.screen.payment.parseContactInfo
 fun BookingDetailDialog(
     onDismiss: () -> Unit,
     viewModel: DetailBookingViewModel = hiltViewModel(),
+    viewModelMyTicket: MyTicketViewModel,
     bookingId: Long
 ) {
     val booking by viewModel.booking.collectAsState()
@@ -85,6 +86,8 @@ fun BookingDetailDialog(
     var isFirst by remember { mutableStateOf(true) }
     var isShowDetail by remember { mutableStateOf(false) }
     var showTicket by remember { mutableStateOf(false) }
+
+    val isError by viewModel.isError.collectAsState()
 
     LaunchedEffect(Unit) {
         if (isFirst) {
@@ -325,6 +328,8 @@ fun BookingDetailDialog(
                 onClick = { showContactSheet = true }
             )
 
+
+
             if (booking.status == "CONFIRMED") {
                 Row(
                     modifier = Modifier
@@ -510,6 +515,8 @@ fun BookingDetailDialog(
     if (showTicket) {
         SeatDetailDialog(booking.tripType, isShowDetail = { isShowDetail = it }, isTicket = { showTicket = it }, booking, uiFlights, seats)
     }
+
+    if (!isError) viewModelMyTicket.deleteInDetal(booking.bookingId)
 }
 
 @Composable
@@ -551,7 +558,7 @@ fun PassengerInputCard(index: Int, passenger: PassengerInfo, onClick: () -> Unit
                     )
 
                     Text(
-                        text = "${passenger.lastName} ${passenger.firstName}\n${passenger.dateOfBirth}",
+                        text = "${passenger.lastName} ${passenger.firstName}\n${passenger.dateOfBirth.split("T").first()}",
                         fontSize = 13.5.sp,
                         color = Color(0xA6000000),
                         lineHeight = 16.sp

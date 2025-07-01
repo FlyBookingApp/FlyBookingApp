@@ -25,7 +25,11 @@ class TicketTypeViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    private var _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     init {
+
         loadAirports()
     }
 
@@ -80,11 +84,13 @@ class TicketTypeViewModel @Inject constructor(
 
     fun loadAirports() {
         viewModelScope.launch {
+            _isLoading.value = true
             repository.fetchAirports()
                 .onSuccess { _airports.value = it
                     android.util.Log.d("TicketTypeViewModel", "Số lượng sân bay: ${it.size}")
                     loadAirportLocations()
                     loadAirportLocationId()
+                    _isLoading.value = false
                 }
                 .onFailure { _error.value = it.message
                     android.util.Log.e("TicketTypeViewModel", "Lỗi gọi API sân bay: ${it.message}")

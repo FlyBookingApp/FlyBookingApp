@@ -15,14 +15,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +45,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.veyu.R
 import com.example.veyu.ui.screen.passenger_infor.FlightData
 import com.example.veyu.ui.screen.seat.BookingNew
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -49,7 +56,7 @@ import java.time.format.DateTimeFormatter
 fun MyTicketScreen(
     viewModel: MyTicketViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
-    ) {
+) {
     val bookingList by viewModel.bookingList.collectAsState()
     val uiFlights by viewModel.uiFlights.collectAsState()
 
@@ -57,7 +64,12 @@ fun MyTicketScreen(
     var selectedDetail by remember { mutableStateOf<Long?>(null) }
     var isShowTicket by remember { mutableStateOf(false) }
 
-    viewModel.init(if (isYesPay) "CONFIRMED" else "PENDING")
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    LaunchedEffect(isYesPay) {
+        viewModel.init(if (isYesPay) "CONFIRMED" else "PENDING")
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -145,17 +157,28 @@ fun MyTicketScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(filteredList) { booking ->
-                    ItemBooking(!isYesPay, booking.tripType, selectedDetail = { selectedDetail = it }, booking, uiFlights, viewModel)
+                if (isLoading) {
+                    items(5) {
+                        TicketSkeletonItem()
+                    }
+                } else {
+                    if (filteredList == null || filteredList.isEmpty()) {
+                        item {
+                            NothingItemInHere("Không có vé nào", "Hãy thử bắt đầu với chuyến bay mới nào")
+                        }
+                    }
+                    items(filteredList) { booking ->
+                        ItemBooking(!isYesPay, booking.tripType, selectedDetail = { selectedDetail = it }, booking, uiFlights, viewModel)
+                    }
                 }
             }
-
         }
     }
 
     selectedDetail?.let {
         BookingDetailDialog(
             onDismiss = { selectedDetail = null },
+            viewModelMyTicket =  viewModel,
             bookingId = it
         )
     }
@@ -181,6 +204,7 @@ fun ItemBooking(
             .fillMaxWidth()
             .padding(top = 10.dp)
             .padding(horizontal = 10.dp)
+            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
             .background(Color.White)
             .padding(horizontal = 10.dp, vertical = 10.dp)
             .clickable {
@@ -233,6 +257,7 @@ fun ItemBooking(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
+            .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
             .background(Color.White)
             .padding(horizontal = 10.dp, vertical = 5.dp)
     )
@@ -309,4 +334,66 @@ fun formatDateTime(input: String): String {
     // Output pattern
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     return parsed.format(formatter)
+}
+
+@Composable
+fun TicketSkeletonItem() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .height(150.dp)
+            .placeholder(
+                visible = true,
+                color = Color.LightGray.copy(alpha = 0.4f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White.copy(alpha = 0.6f)
+                )
+            )
+    ) {}
+}
+
+@Composable
+fun NothingItemInHere(
+    title: String,
+    description: String
+) {
+    Box(
+        modifier = Modifier
+            .padding(20.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.noteverything),
+                contentDescription = null,
+                modifier = Modifier.height(250.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = title,
+                color = Color.Black,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = description,
+                color = Color.Gray,
+                fontSize = 16.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
 }

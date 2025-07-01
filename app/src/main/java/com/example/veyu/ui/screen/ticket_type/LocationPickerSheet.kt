@@ -18,16 +18,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun LocationPickerSheet(
     currentDeparture: String,
     currentDestination: String,
+    viewModel: TicketTypeViewModel,
     airportOptions: List<String>,
     onSelect: (String, String) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
+
 ) {
+    val isLoading by viewModel.isLoading.collectAsState()
     var departure by remember { mutableStateOf(currentDeparture) }
     var destination by remember { mutableStateOf(currentDestination) }
 
@@ -88,19 +94,23 @@ fun LocationPickerSheet(
                         .heightIn(max = 280.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    filteredDep.forEach {
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    departure = it
-                                    if (it == destination) destination = ""
-                                    searchDep = ""
-                                }
-                                .padding(8.dp),
-                            color = if (departure == it) Color.Blue else Color.Black
-                        )
+                    if (isLoading) {
+                        repeat(5) { AirportSkeletonItem() }
+                    } else {
+                        filteredDep.forEach {
+                            Text(
+                                text = it,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        departure = it
+                                        if (it == destination) destination = ""
+                                        searchDep = ""
+                                    }
+                                    .padding(8.dp),
+                                color = if (departure == it) Color.Blue else Color.Black
+                            )
+                        }
                     }
                 }
             }
@@ -134,19 +144,23 @@ fun LocationPickerSheet(
                         .heightIn(max = 280.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    filteredDest.forEach {
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    destination = it
-                                    if (it == departure) departure = ""
-                                    searchDest = ""
-                                }
-                                .padding(8.dp),
-                            color = if (destination == it) Color.Red else Color.Black
-                        )
+                    if (isLoading) {
+                        repeat(5) { AirportSkeletonItem() }
+                    } else {
+                        filteredDest.forEach {
+                            Text(
+                                text = it,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        destination = it
+                                        if (it == departure) departure = ""
+                                        searchDest = ""
+                                    }
+                                    .padding(8.dp),
+                                color = if (destination == it) Color.Red else Color.Black
+                            )
+                        }
                     }
                 }
             }
@@ -162,4 +176,23 @@ fun LocationPickerSheet(
             Text("Xác nhận")
         }
     }
+}
+
+
+@Composable
+fun AirportSkeletonItem() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(20.dp)
+            .placeholder(
+                visible = true,
+                color = Color.LightGray.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(4.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White.copy(alpha = 0.6f)
+                )
+            )
+    )
 }

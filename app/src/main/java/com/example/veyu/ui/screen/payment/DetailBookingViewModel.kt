@@ -23,6 +23,7 @@ import com.example.veyu.ui.screen.seat.BookingNew
 import com.example.veyu.ui.screen.seat.Seat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -58,8 +59,11 @@ class DetailBookingViewModel @Inject constructor(
     private val _seats = MutableStateFlow<List<Seat>>(emptyList())
     val seats: StateFlow<List<Seat>> = _seats
 
-    private val _isError = MutableStateFlow(false)
+    private val _isError = MutableStateFlow(true)
     val isError: StateFlow<Boolean> = _isError
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
         Log.d("DetailBookingViewModel", "Created")
@@ -76,11 +80,13 @@ class DetailBookingViewModel @Inject constructor(
         _uiFlights.value = emptyList()
         _uiPassenger.value = emptyList()
         _booking.value = BookingNew()
-        _isError.value = false
+        _isError.value = true
+        _isLoading.value = true
         isRoundTrip = false
         userId = null
 
         viewModelScope.launch {
+            _isLoading.value = true
             try {
                 val bookingResult = repositoryBooking.getBookingById(request)
                 val bookingResponse = bookingResult.getOrNull() ?: return@launch
@@ -145,6 +151,7 @@ class DetailBookingViewModel @Inject constructor(
                     }
                 }
 
+                _isLoading.value = false
             } catch (e: Exception) {
                 Log.e("PaymentViewModel", "init error: ${e.message}")
             }
@@ -221,9 +228,11 @@ class DetailBookingViewModel @Inject constructor(
                 }
                 Log.d("PaymentViewModel", "deleteBooking: ${result.toString()}")
                 Toast.makeText(context, "Hủy booking thành công!!", Toast.LENGTH_SHORT).show()
+                _isError.value = false
             } catch (e: Exception) {
                 Log.e("PaymentViewModel", "deleteBooking error: ${e.message}")
                 Toast.makeText(context, "Lỗi: Hủy booking thất bại!!", Toast.LENGTH_SHORT).show()
+                _isError.value = true
             }
         }
     }

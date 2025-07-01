@@ -7,6 +7,7 @@ import com.example.veyu.data.repository.TicketRepository
 import com.example.veyu.ui.screen.seat.Seat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,11 +25,16 @@ class TicketViewModel @Inject constructor(
     private val _returnTickets = MutableStateFlow<List<Ticket>>(emptyList())
     val returnTickets: StateFlow<List<Ticket>> = _returnTickets
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     fun init(bookingId: Long) {
         _departureTickets.value = emptyList()
         _returnTickets.value = emptyList()
+        _isLoading.value = true
 
         viewModelScope.launch {
+            _isLoading.value = true
             val ticketListResult =  ticketRepository.getTicketByBookingId(bookingId)
             Log.d("TicketViewModel", "departureTickets: ${_departureTickets.value.toString()}")
             val ticketListResponse = ticketListResult.getOrNull() ?: return@launch
@@ -78,6 +84,8 @@ class TicketViewModel @Inject constructor(
                         updatedAt = convertIsoToReadable(it.updatedAt)
                     )
                 }
+
+            _isLoading.value = false
         }
     }
 }

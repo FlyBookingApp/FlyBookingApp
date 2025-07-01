@@ -61,6 +61,9 @@ import kotlinx.coroutines.delay
 import com.example.veyu.ui.screen.my_ticket.PassengerInputCard
 import com.example.veyu.ui.screen.my_ticket.ContactInfoCard
 import com.example.veyu.ui.screen.my_ticket.SeatDetailDialog
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -88,6 +91,7 @@ fun PaymentScreen(
     var editingIndex by remember { mutableStateOf<Int?>(null) }
     var showContactSheet by remember { mutableStateOf(false) }
 
+    val isLoading by viewModel.isLoading.collectAsState()
     var isShowDetail by remember { mutableStateOf(false) }
     var showTicket by remember { mutableStateOf(false) }
 
@@ -121,17 +125,19 @@ fun PaymentScreen(
         }
     }
 
-
-
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.background_2_1),
+            painter = painterResource(id = R.drawable.backgrouppay),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
+            if (isLoading) {
+                PaymentSkeletonScreen()
+                return
+            }
             // Header
             Column(
                 modifier = Modifier
@@ -827,4 +833,109 @@ fun CountdownText(targetTimeStr: String, viewModel: DetailBookingViewModel, book
         viewModel.onDelete(bookingId, context)
     }
 }
+@Composable
+fun PaymentSkeletonScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(16.dp)
+    ) {
+        // Tiêu đề
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(24.dp)
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(6.dp),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White.copy(alpha = 0.6f)
+                    )
+                )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // 2 khối chuyến bay
+        repeat(2) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .placeholder(
+                        visible = true,
+                        color = Color.LightGray.copy(alpha = 0.4f),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White.copy(alpha = 0.6f)
+                        )
+                    )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Ghế đã đặt
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.4f),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White.copy(alpha = 0.6f)
+                    )
+                )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Hành khách
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.4f),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White.copy(alpha = 0.6f)
+                    )
+                )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Thông tin liên hệ
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.4f),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White.copy(alpha = 0.6f)
+                    )
+                )
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Nút thanh toán
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .placeholder(
+                    visible = true,
+                    color = Color.LightGray.copy(alpha = 0.4f),
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White.copy(alpha = 0.6f)
+                    )
+                )
+        )
+    }
+}

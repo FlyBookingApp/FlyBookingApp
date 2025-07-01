@@ -105,7 +105,7 @@ fun PaymentDialog(
                 Row (modifier = Modifier.fillMaxWidth())
                 {
                     BankCardSelector(
-                        isSelected = selected,
+                        isSelected = !selected,
                         onClick = { selected = true },
                         logo = painterResource(id = R.drawable.mb),
                         bankName = "MBBank",
@@ -115,7 +115,7 @@ fun PaymentDialog(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     BankCardSelector(
-                        isSelected = !selected,
+                        isSelected = selected,
                         onClick = { },
                         logo = painterResource(id = R.drawable.paymeth),
                         bankName = "Thêm",

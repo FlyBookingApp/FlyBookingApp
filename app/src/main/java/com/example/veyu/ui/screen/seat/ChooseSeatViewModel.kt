@@ -137,7 +137,6 @@ class ChooseSeatViewModel @Inject constructor(
                 _seatsPE.value = _seatsPremiuEconomy
 
                 _isError.value = false
-
             } catch (e: Exception) {
                 Log.e("ChooseSeatViewModel", "API error: ${e.message}")
                 _seatsBusiness = emptyList()

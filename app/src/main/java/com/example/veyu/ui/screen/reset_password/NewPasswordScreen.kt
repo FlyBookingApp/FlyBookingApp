@@ -1,13 +1,36 @@
-package com.example.veyu.ui.screen.login
+package com.example.veyu.ui.screen.reset_password
 
-import androidx.compose.runtime.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,38 +46,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.veyu.R
-import com.example.veyu.data.local.UserPreferences
 import com.example.veyu.ui.screen.login.ui.theme.button_color_blue
 import com.example.veyu.ui.screen.login.ui.theme.white_form
+import com.example.veyu.ui.screen.reset_password.ui.theme.FlyBokingTheme
 
 @Composable
-fun WelcomePreview() {
-    LoginScreen(
-        onNavigateToMain = {},
-        onNavigateToRegister = {},
-        onNavigateToForgotPassword = {}
-    )
-}
-@Composable
-fun LoginScreen(
+fun NewPasswordScreen(
+    viewModel: NewPasswordViewModel,
     onNavigateToMain: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
-    val context = LocalContext.current
-    val userPreferences = remember { UserPreferences(context) }
-
-    val viewModel: LoginViewModel = viewModel(
-        factory = LoginViewModelFactory(userPreferences)
-    )
-
     val state by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(state.isLoggedIn) {
-        if (state.isLoggedIn) onNavigateToMain()
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -75,7 +79,9 @@ fun LoginScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
-                modifier = Modifier.width(200.dp).height(70.dp)
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(70.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -91,7 +97,7 @@ fun LoginScreen(
                         .padding(horizontal = 24.dp, vertical = 32.dp)
                 ) {
                     Text(
-                        text = "Đăng nhập",
+                        text = "Đặt lại mật khẩu",
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
@@ -99,42 +105,6 @@ fun LoginScreen(
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
-
-                    Text(text = "Email", fontSize = 14.sp, color = Color.Black)
-                    TextField(
-                        value = state.email,
-                        onValueChange = viewModel::onEmailChange,
-                        placeholder = {
-                            Text(
-                                text = "Nhập email",
-                                color = Color.Black
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        leadingIcon = {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_email),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp),
-                                contentScale = ContentScale.Fit
-                            )
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(50),
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black,
-                            unfocusedContainerColor = Color(0xFFC2F2F9),
-                            focusedContainerColor = Color(0xFFC2F2F9),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     var passwordVisible by remember { mutableStateOf(false) }
                     Text(text = "Mật khẩu", fontSize = 14.sp, color = Color.Black)
@@ -184,10 +154,63 @@ fun LoginScreen(
                             .padding(vertical = 6.dp)
                     )
 
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    var passwordVisibleAgain by remember { mutableStateOf(false) }
+                    Text(text = "Nhập lại mặt khẩu", fontSize = 14.sp, color = Color.Black)
+                    TextField(
+                        value = state.passwordConfirmation,
+                        onValueChange = viewModel::onConfirmPasswordChange,
+                        placeholder = {
+                            Text(
+                                text = "Nhập lại mật khẩu",
+                                color = Color.Black
+                            )
+                        },
+                        leadingIcon = {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_password),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisibleAgain = !passwordVisibleAgain }) {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (passwordVisibleAgain) R.drawable.ic_visibility
+                                        else R.drawable.ic_visibility_off
+                                    ),
+                                    contentDescription = if (passwordVisibleAgain) "Ẩn mật khẩu" else "Hiện mật khẩu",
+                                    tint = Color.Gray
+                                )
+                            }
+                        },
+                        visualTransformation = if (!passwordVisibleAgain) PasswordVisualTransformation() else VisualTransformation.None,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        shape = RoundedCornerShape(50),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            unfocusedContainerColor = Color(0xFFC2F2F9),
+                            focusedContainerColor = Color(0xFFDC2F2F9),
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp)
+                    )
+
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    val context = LocalContext.current
                     Button(
-                        onClick = viewModel::onLoginClick,
+                        onClick = {
+                            viewModel.onResetPassword(context, onNavigateToMain)
+                        },
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = button_color_blue,
@@ -199,7 +222,7 @@ fun LoginScreen(
                             .height(48.dp)
                             .padding(horizontal = 52.dp)
                     ) {
-                        Text("Đăng nhập", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text("Xác nhận", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -218,10 +241,10 @@ fun LoginScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Quên mật khẩu",
+                            text = "Đăng nhập",
                             fontSize = 14.sp,
-                            color = Color.Gray,
-                            modifier = Modifier.clickable { onNavigateToForgotPassword() }
+                            color = Color(0xFF03A9F4),
+                            modifier = Modifier.clickable { onNavigateToLogin() }
                         )
                         Text(
                             text = "Đăng ký",

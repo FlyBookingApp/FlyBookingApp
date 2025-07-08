@@ -32,7 +32,8 @@ import com.example.veyu.ui.screen.login.ui.theme.white_form
 fun RegisterScreen(
     viewModel: RegisterViewModel = viewModel(),
     onNavigateToLogin: () -> Unit,
-    onNavigateToMain: () -> Unit
+    onNavigateToMain: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(state.isRegistered) {
@@ -166,8 +167,14 @@ fun RegisterScreen(
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
+                                Text(
+                                    text = "Quên mật khẩu",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray,
+                                    modifier = Modifier.clickable { onNavigateToForgotPassword() }
+                                )
                                 Text(
                                     text = "Đăng nhập",
                                     fontSize = 14.sp,

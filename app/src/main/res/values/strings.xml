@@ -11,4 +11,5 @@
     <string name="title_activity_payment_booking_screen">PaymentBookingScreen</string>
     <string name="title_activity_my_booking_screen">MyBookingScreen</string>
     <string name="title_activity_payment_screen">PaymentScreen</string>
+    <string name="title_activity_reset_password">ResetPassword</string>
 </resources>

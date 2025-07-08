@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.veyu.data.local.UserPreferences
 import com.example.veyu.data.remote.NetworkModule
 import com.example.veyu.data.remote.api.AirportApi
+import com.example.veyu.data.remote.api.AuthApi
 import com.example.veyu.data.remote.api.FlightApi
 import com.example.veyu.data.remote.api.SeatFlightApi
 import com.example.veyu.data.repository.AirportRepository
@@ -15,6 +16,7 @@ import com.example.veyu.data.remote.api.PassengerApi
 import com.example.veyu.data.remote.api.PaymentMethodApi
 import com.example.veyu.data.remote.api.PaymentTransactionApi
 import com.example.veyu.data.remote.api.TicketApi
+import com.example.veyu.data.repository.AuthRepository
 import com.example.veyu.data.repository.BookingRepository
 import com.example.veyu.data.repository.PassengerRepository
 import com.example.veyu.data.repository.PaymentMethodRepository
@@ -29,6 +31,15 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    // Auth
+    @Provides
+    fun provideAuthApi(): AuthApi {
+        return NetworkModule.authApi
+    }
+
+    @Provides
+    fun provideAuthRepository(api: AuthApi): AuthRepository = AuthRepository(api)
 
     // Airport
     @Provides

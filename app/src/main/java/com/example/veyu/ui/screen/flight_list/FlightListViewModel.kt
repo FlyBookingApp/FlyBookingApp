@@ -8,12 +8,15 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.veyu.R
+import com.example.veyu.data.local.UserPreferences
 import com.example.veyu.data.repository.FlightRepository
 import com.example.veyu.domain.model.FlightSearchRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -24,7 +27,8 @@ import java.util.Locale
 
 @HiltViewModel
 class FlightListViewModel @Inject constructor(
-    private val repository: FlightRepository
+    private val repository: FlightRepository,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
     private var _departureFlights: List<FlightInfo> = emptyList()
     private val _dtFlights = MutableStateFlow<List<FlightInfo>>(emptyList())
@@ -37,6 +41,9 @@ class FlightListViewModel @Inject constructor(
     private var _allFlights: List<FlightInfo> = emptyList()
     private val _flights = MutableStateFlow<List<FlightInfo>>(emptyList())
     val flights: StateFlow<List<FlightInfo>> = _flights
+
+    private var _isLogin = MutableStateFlow(true)
+    val isLogin: StateFlow<Boolean> = _isLogin
 
     private var _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -70,6 +77,19 @@ class FlightListViewModel @Inject constructor(
 
     fun setFlightSelectedManually(value: Boolean) {
         _isFlightSelectedManually.value = value
+    }
+
+    fun onChangeIsLogin() {
+        viewModelScope.launch {
+            val token = userPreferences.token.first()
+            val isLoggedIn = !token.isNullOrEmpty()
+            _isLogin.value = isLoggedIn
+            Log.d("FlightListViewModel", "onChangeIsLogin: $isLoggedIn")
+        }
+    }
+
+    fun resetIsLogin() {
+        _isLogin.value = true
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

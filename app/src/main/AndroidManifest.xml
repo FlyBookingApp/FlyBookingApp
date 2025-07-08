@@ -18,6 +18,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.screen.reset_password.ResetPassword"
+            android:exported="false"
+            android:label="@string/title_activity_reset_password"
+            android:theme="@style/Theme.VeYu" />
+        <activity
             android:name=".ui.screen.payment.PaymentScreen"
             android:exported="false"
             android:label="@string/title_activity_payment_screen"

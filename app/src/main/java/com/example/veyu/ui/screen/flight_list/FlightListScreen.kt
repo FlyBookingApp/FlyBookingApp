@@ -55,6 +55,7 @@ import com.example.veyu.R
 import com.example.veyu.data.repository.FlightRepository
 import com.example.veyu.domain.model.BookingRequest
 import com.example.veyu.domain.model.FlightSearchRequest
+import com.example.veyu.ui.screen.home.isNotLoginDialog
 import com.example.veyu.ui.screen.my_ticket.NothingItemInHere
 import com.example.veyu.ui.screen.ticket_type.TicketTypeViewModel
 import com.example.veyu.ui.screen.ticket_type.toReadableString
@@ -78,7 +79,8 @@ fun FlightListScreen(
     request: FlightSearchRequest?,
     onNavigateToMain: (BookingRequest) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateBackToHome: () -> Unit
+    onNavigateBackToHome: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -90,8 +92,10 @@ fun FlightListScreen(
     val returnFlights by viewModel.rnFlights.collectAsState()
     val flights by viewModel.flights.collectAsState()
     val flightBookingType by viewModel.flightBookingType.collectAsState()
+    val isLogin by viewModel.isLogin.collectAsState()
     var showFilterSheet by remember { mutableStateOf(false) }
     var showSheet by remember { mutableStateOf(false) }
+
     // biến để lưu vé sẽ chọn
     var selectedFlight by remember { mutableStateOf<FlightInfo?>(null) }
 
@@ -170,17 +174,21 @@ fun FlightListScreen(
                     onShowSheetChange = { showSheet = it },
                     onShowFilter = { showFilterSheet = true }
                 )
-
             }
         }
     }
     if (selectedFlight != null) {
-        FlightDetailDialog(
-            viewModel = viewModel,
-            flight = selectedFlight!!,
-            onDismiss = { selectedFlight = null },
-            navController = navController
-        )
+        viewModel.onChangeIsLogin()
+        if (isLogin) {
+            FlightDetailDialog(
+                viewModel = viewModel,
+                flight = selectedFlight!!,
+                onDismiss = { selectedFlight = null },
+                navController = navController
+            )
+        } else {
+            selectedFlight = null
+        }
     }
 
     if (showFilterSheet) {
@@ -212,8 +220,20 @@ fun FlightListScreen(
 
     }
 
-
-
+    if (!isLogin) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {},
+            contentAlignment = Alignment.BottomCenter) {
+            isNotLoginDialog(
+                onDismiss = { viewModel.resetIsLogin() },
+                navLogin = {
+                    viewModel.resetIsLogin()
+                    onNavigateToLogin()
+                }
+            )
+        }
+    }
 }
 
 @Composable

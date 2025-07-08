@@ -50,6 +50,7 @@ class MyTicketViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     fun init(status: String) {
         viewModelScope.launch {
+            Log.d("DispatcherCheck", "Coroutine running on thread: ${Thread.currentThread().name}")
             _isLoading.value = true
             val userId = fetchUserFromLocalStoreSuspend() ?: return@launch
 
@@ -96,7 +97,7 @@ class MyTicketViewModel @Inject constructor(
                         bookingReference = booking.bookingReference,
                         userId = booking.userId,
                         status = booking.status,
-                        totalPrice = formatPrice(booking.totalAmount),
+                        totalPrice = formatPrice(booking.totalPrice),
                         passengerIds = booking.passengerIds ?: emptyList(),
                         tripType = booking.tripType == "ROUND_TRIP",
                         bookingDate = booking.bookingDate,
@@ -180,6 +181,7 @@ class MyTicketViewModel @Inject constructor(
 
     fun onDelete(bookingId: Long, context: Context) {
         viewModelScope.launch {
+            Log.d("DispatcherCheck", "Coroutine running on thread: ${Thread.currentThread().name}")
             try {
                 val result = repositoryBooking.deleteBooking(bookingId)
                 Log.d("PaymentViewModel", "deleteBooking: ${result}")

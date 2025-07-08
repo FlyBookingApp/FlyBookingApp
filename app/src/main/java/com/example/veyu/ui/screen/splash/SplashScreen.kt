@@ -24,11 +24,7 @@ fun SplashScreen(
 
     LaunchedEffect(state.isLoading) {
         if (!state.isLoading) {
-            if (state.isLoggedIn) {
-                onNavigateNext()       // → home
-            } else {
-                onNavigateToLogin()   // → login
-            }
+            onNavigateNext()
         }
     }
 

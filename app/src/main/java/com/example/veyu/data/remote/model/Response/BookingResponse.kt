@@ -6,7 +6,7 @@ data class BookingResponse (
     val userId: Long,
     val userFullName: String,
     val status: String,
-    val totalAmount: Double,
+    val totalPrice: Double,
     val passengerIds: List<Long>,
     val flightIds: List<Long>,
     val seatFlights: List<seatFlight>,

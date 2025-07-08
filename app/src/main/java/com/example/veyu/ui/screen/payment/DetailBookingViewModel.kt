@@ -112,7 +112,7 @@ class DetailBookingViewModel @Inject constructor(
                     bookingReference = bookingResponse.bookingReference,
                     userId = bookingResponse.userId,
                     status = bookingResponse.status,
-                    totalPrice = formatPrice(bookingResponse.totalAmount),
+                    totalPrice = formatPrice(bookingResponse.totalPrice),
                     passengerIds = bookingResponse.passengerIds ?: emptyList(),
                     tripType = bookingResponse.tripType == "ROUND_TRIP",
                     bookingDate = bookingResponse.bookingDate,

@@ -19,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkModule {
 
-    private const val BASE_URL = "http://192.168.1.37:8080/"
+    private const val BASE_URL = "http://192.168.1.12:8080/"
 
     // Hàm tạo Retrofit với interceptor (gửi token)
     fun provideRetrofitWithAuth(context: Context): Retrofit {

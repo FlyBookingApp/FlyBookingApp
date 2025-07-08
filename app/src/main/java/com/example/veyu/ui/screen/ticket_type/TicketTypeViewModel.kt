@@ -84,6 +84,7 @@ class TicketTypeViewModel @Inject constructor(
 
     fun loadAirports() {
         viewModelScope.launch {
+            Log.d("DispatcherCheck", "Coroutine running on thread: ${Thread.currentThread().name}")
             _isLoading.value = true
             repository.fetchAirports()
                 .onSuccess { _airports.value = it

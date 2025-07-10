@@ -6,6 +6,7 @@ import com.example.veyu.data.remote.model.Request.RegisterRequest
 import com.example.veyu.data.remote.model.Request.ResetPasswordRequest
 import com.example.veyu.data.remote.model.Request.SendOtpRequest
 import com.example.veyu.data.remote.model.Request.VerifyOPTRequest
+import com.example.veyu.data.remote.model.Response.RefreshTokenRequest
 import com.example.veyu.data.remote.model.Response.RegisterResponse
 import okhttp3.Request
 import retrofit2.http.Body
@@ -28,5 +29,5 @@ interface AuthApi {
     suspend fun resetPassword(@Body request: ResetPasswordRequest): String
 
     @POST("api/v1/auth/refresh")
-    suspend fun refresh(@Body refreshToken: String): String
+    suspend fun refresh(@Body refreshToken: RefreshTokenRequest): String
 }

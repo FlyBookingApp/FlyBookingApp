@@ -397,6 +397,7 @@ fun TicketTypeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .pointerInput(Unit) {}
                     .background(Color(0x80000000)) // lớp nền mờ
                     .pointerInput(Unit) {}
             ) {
@@ -418,6 +419,7 @@ fun TicketTypeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .pointerInput(Unit) {}
                     .background(Color(0x80000000)) // lớp nền mờ
 
             ) {
@@ -439,6 +441,7 @@ fun TicketTypeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .pointerInput(Unit) {}
                     .background(Color(0x80000000)) // nền mờ
                     .pointerInput(Unit) {}
 

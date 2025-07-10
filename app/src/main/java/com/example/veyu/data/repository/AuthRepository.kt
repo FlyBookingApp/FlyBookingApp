@@ -7,6 +7,7 @@ import com.example.veyu.data.remote.model.Request.RegisterRequest
 import com.example.veyu.data.remote.model.Request.ResetPasswordRequest
 import com.example.veyu.data.remote.model.Request.SendOtpRequest
 import com.example.veyu.data.remote.model.Request.VerifyOPTRequest
+import com.example.veyu.data.remote.model.Response.RefreshTokenRequest
 import com.example.veyu.data.remote.model.Response.RegisterResponse
 
 class AuthRepository(private val api: AuthApi) {
@@ -62,7 +63,7 @@ class AuthRepository(private val api: AuthApi) {
 
     suspend fun refresh(refreshToken: String): Result<String> {
         return try {
-            val response = api.refresh(refreshToken)
+            val response = api.refresh(RefreshTokenRequest(refreshToken))
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)

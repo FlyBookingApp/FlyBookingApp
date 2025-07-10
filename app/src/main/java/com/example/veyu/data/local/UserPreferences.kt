@@ -13,16 +13,18 @@ private val Context.dataStore by preferencesDataStore(name = "user_prefs")
 class UserPreferences(private val context: Context) {
     companion object {
         val KEY_TOKEN = stringPreferencesKey("auth_token")
+        val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
         val KEY_NAME = stringPreferencesKey("user_name")
         val KEY_EMAIL = stringPreferencesKey("user_email")
         val KEY_PHONE = stringPreferencesKey("user_phone")
     }
 
     // Lưu token
-    suspend fun saveToken(token: String, name: String) {
+    suspend fun saveToken(token: String, name: String, refreshToken: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_TOKEN] = token
             prefs[KEY_NAME] = name
+            prefs[KEY_REFRESH_TOKEN] = refreshToken
         }
     }
 
@@ -38,7 +40,16 @@ class UserPreferences(private val context: Context) {
     suspend fun clearToken() {
         context.dataStore.edit { prefs ->
             prefs.remove(KEY_TOKEN)
+            prefs.remove(KEY_REFRESH_TOKEN)
             prefs.remove(KEY_NAME)
+        }
+    }
+
+    // Cập nhập lại token
+    suspend fun updateToken(token: String) {
+        context.dataStore.edit { prefs ->
+            prefs.remove(KEY_TOKEN)
+            prefs[KEY_TOKEN] = token
         }
     }
 
@@ -48,4 +59,7 @@ class UserPreferences(private val context: Context) {
 
     val userName: Flow<String?> = context.dataStore.data
         .map { prefs -> prefs[KEY_NAME] }
+
+    val refreshToken: Flow<String?> = context.dataStore.data
+        .map { prefs -> prefs[KEY_REFRESH_TOKEN] }
 }

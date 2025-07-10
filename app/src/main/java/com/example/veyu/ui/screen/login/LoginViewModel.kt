@@ -45,7 +45,7 @@ class LoginViewModel(
                         isLoading = false,
                         isLoggedIn = true,
                     )
-                    userPreferences.saveToken(response.token, email) // Lưu token vào DataStore
+                    userPreferences.saveToken(response.token, email, response.refreshToken) // Lưu token vào DataStore
                 }.onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
